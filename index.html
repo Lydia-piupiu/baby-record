@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="description" content="嘟嘟宝宝的喂养、睡眠、辅食排敏、生长曲线记录">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="嘟嘟记录">
+<meta name="theme-color" content="#FF8FA3">
+<meta property="og:title" content="👶 嘟嘟宝宝工作台">
+<meta property="og:description" content="喂养 · 睡眠 · 辅食排敏 · 生长曲线 · 疫苗用药">
+<meta property="og:type" content="website">
+<title>嘟嘟宝宝工作台 v10</title>
+<style>
+:root{
+--p1:#FF8FA3;--p2:#FFA8B8;--p3:#FFD6DE;--p4:#FFF0F3;--pd:#E5687F;
+--mint:#7FD8B8;--mintL:#E2F8F0;--lemon:#FFD98E;--lemonL:#FFF6E3;
+--lilac:#C0AAE8;--lilacL:#F1ECFB;--sky:#8FCBEC;--skyL:#E7F4FC;
+--peach:#FFB68A;--peachL:#FFF0E6;--sage:#C2D89A;--sageL:#F1F7E6;
+--bg:#FFF9FB;--txt:#4A4048;--txt2:#9C919B;--bd:#F5E9ED;
+--sh:0 3px 14px rgba(255,143,163,.15);--sh2:0 2px 8px rgba(255,143,163,.09);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{background:#FFF9FB}
+body{font-family:-apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:#FFF9FB;color:#4A4048;font-size:14px;line-height:1.55;display:block!important;visibility:visible!important;opacity:1!important}
+.app{max-width:480px;margin:0 auto;min-height:100vh;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+.ctl{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+.vbar{background:linear-gradient(90deg,#FFE3E9,#FFF3F6);color:var(--pd);font-size:11px;text-align:center;padding:6px;font-weight:700}
+
+/* 头部 */
+.head{display:none;position:relative;background:linear-gradient(160deg,#FFB0BE,#FF8FA3 60%,#F5798F);color:#fff;padding:16px 14px 30px;text-align:center;border-radius:0 0 30px 30px;overflow:hidden}
+.head::before{content:"";position:absolute;top:-32px;right:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.13)}
+.head::after{content:"";position:absolute;bottom:-40px;left:-22px;width:96px;height:96px;border-radius:50%;background:rgba(255,255,255,.1)}
+.head .av{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.3);font-size:27px;line-height:50px;margin:0 auto 5px;position:relative;z-index:2}
+.head .nm{font-size:16px;font-weight:800;position:relative;z-index:2}
+.head .age{font-size:12px;opacity:.93;margin-top:2px;position:relative;z-index:2}
+.head .dnav{display:flex;align-items:center;gap:8px;margin-top:11px;position:relative;z-index:2}
+.head .dnav .ttl{flex:1;font-size:18px;font-weight:800}
+.head .dnav label{width:38px;height:38px;line-height:38px;border-radius:50%;background:rgba(255,255,255,.26);font-size:17px;cursor:pointer;flex-shrink:0;transition:.2s}
+.head .dnav label:active{background:rgba(255,255,255,.48);transform:scale(.9)}
+.head .dnav label.off{opacity:.2}
+.head .pill{display:inline-block;margin-top:7px;padding:3px 13px;border-radius:20px;background:rgba(255,255,255,.26);font-size:11px;position:relative;z-index:2}
+
+/* 摘要 */
+.sum{display:none;background:#fff;border-radius:22px;margin:-20px 11px 11px;padding:14px 4px 12px;box-shadow:var(--sh);position:relative;z-index:5}
+.sum .row{display:flex;text-align:center}
+.sum .it{flex:1;min-width:0}
+.sum .ic{width:38px;height:38px;line-height:38px;border-radius:13px;margin:0 auto 5px;font-size:18px}
+.sum .n{font-size:13.5px;font-weight:800;color:var(--pd)}
+.sum .u{font-size:9.5px;color:var(--txt2);margin-top:1px}
+.sum .l{font-size:9.5px;color:var(--txt2);margin-top:2px}
+
+/* Tab 两行网格 */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:#fff;margin:0 11px 11px;border-radius:20px;padding:7px;box-shadow:var(--sh2)}
+.tabs label{text-align:center;padding:8px 1px;border-radius:14px;font-size:10.5px;color:var(--txt2);cursor:pointer;transition:.2s;background:#FDFAFB}
+.tabs label i{display:block;font-size:18px;font-style:normal;margin-bottom:2px}
+.tabs label:active{transform:scale(.93)}
+
+/* 卡片 */
+.dayblk{display:none}
+.pane{display:none;padding:0 11px}
+.card{background:#fff;border-radius:20px;box-shadow:var(--sh2);margin-bottom:11px;overflow:hidden}
+.card>h3{font-size:13.5px;padding:13px 14px 11px;font-weight:800;display:flex;align-items:center;gap:6px}
+.card>h3+*{border-top:1px solid var(--bd)}
+.bdg{padding:2px 9px;border-radius:12px;font-size:10px;font-weight:800;margin-left:auto}
+.ok{background:var(--mintL);color:#33A07A}.no{background:#FFEAEE;color:#D4576E}
+.wt{background:var(--lemonL);color:#C6913A}.nu{background:var(--lilacL);color:#8A6FC4}
+
+/* 时间线 */
+.tl .ev{display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:1px solid var(--bd)}
+.tl .ev:last-child{border-bottom:none}
+.tl .ic{width:38px;height:38px;line-height:38px;text-align:center;border-radius:13px;font-size:18px;flex-shrink:0}
+.tl .t{width:46px;font-size:14.5px;font-weight:800;flex-shrink:0}
+.tl .b{flex:1;min-width:0}
+.tl .k{font-size:13px;font-weight:700}
+.tl .v{font-size:11.5px;color:var(--txt2);margin-top:2px}
+.tl .amt{color:var(--pd);font-weight:800}
+.tl .ev.nxd{background:#FDFBFC}.tl .ev.nxd .t{color:var(--txt2)}
+.nx{font-size:11px;padding:7px 13px;background:linear-gradient(90deg,var(--p4),#fff);color:var(--pd);font-weight:700}
+
+/* 睡眠 */
+.slp{padding:13px}
+.slp .bar{display:flex;height:23px;border-radius:9px;overflow:hidden;background:#F7F3F5}
+.slp .seg{background:linear-gradient(180deg,#AFC0F0,#8090D8)}
+.slp .ax{display:flex;justify-content:space-between;font-size:10px;color:var(--txt2);margin-top:5px}
+.slp .lst{margin-top:10px;font-size:12px;color:var(--txt2);line-height:1.95}
+.slp .lst b{color:var(--txt);font-weight:700}
+
+/* 打卡 */
+.chk{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px 13px}
+.chk .i{display:flex;align-items:center;gap:7px;padding:9px;background:#FCFAFB;border-radius:13px;font-size:12.5px}
+.chk .i.y{background:var(--mintL)}
+.chk .i .d{width:20px;height:20px;line-height:20px;text-align:center;border-radius:50%;font-size:11px;flex-shrink:0;background:#ECE5E9;color:#C0B5BC;font-weight:800}
+.chk .i.y .d{background:var(--mint);color:#fff}
+.chk .i span{flex:1;line-height:1.3}
+.rate{padding:12px 14px;font-size:18px;color:#FFB800;letter-spacing:3px}
+
+/* 辅食 */
+.meal{padding:12px 13px}
+.mh{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.mh .ic{width:40px;height:40px;line-height:40px;text-align:center;border-radius:13px;font-size:20px;background:var(--lemonL);flex-shrink:0}
+.mh .tm{font-size:15px;font-weight:800}
+.mh .sb{font-size:11px;color:var(--txt2)}
+.food{display:flex;flex-wrap:wrap;gap:6px}
+.food span{padding:6px 12px;border-radius:16px;font-size:12px;font-weight:700}
+.f-ok{background:var(--sageL);color:#67833A}
+.f-new{background:var(--lemonL);color:#C6913A;border:1.5px dashed #F0C46A}
+.f-alg{background:#FFEAEE;color:#D4576E}
+.f-ph{background:#FAF6F8;color:var(--txt2);font-weight:500;border:1.5px dashed #E8DCE2}
+.pill2{display:inline-block;padding:3px 10px;border-radius:14px;font-size:10.5px;font-weight:700;background:var(--p4);color:var(--pd)}
+
+/* 生长曲线 */
+.gwrap{padding:10px 6px 4px}
+.gcur{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:13px}
+.gcur .b{background:linear-gradient(160deg,#fff,#FFF7F9);border:1.5px solid var(--bd);border-radius:16px;padding:11px 6px;text-align:center}
+.gcur .b .ic{font-size:20px}
+.gcur .b .v{font-size:19px;font-weight:800;color:var(--pd);margin-top:3px;letter-spacing:-.5px}
+.gcur .b .l{font-size:10px;color:var(--txt2);margin-top:1px}
+.gcur .b .d{font-size:9.5px;color:var(--mint);font-weight:700;margin-top:3px}
+.glgd{display:flex;justify-content:center;gap:14px;padding:2px 0 12px;font-size:11px;color:var(--txt2);flex-wrap:wrap}
+.glgd i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:4px;vertical-align:3px;font-style:normal}
+
+/* 表格 */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:8px 11px;text-align:left;border-bottom:1px solid var(--bd)}
+th{font-size:11px;color:var(--txt2);font-weight:800;background:#FDFAFB}
+tr.hot td{background:var(--p4);font-weight:700}
+td.c,th.c{text-align:center}
+tr:last-child td{border-bottom:none}
+
+/* 图表 */
+.bars{display:flex;align-items:flex-end;gap:4px;padding:13px 9px 5px;height:200px}
+.bars .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;min-width:0}
+.bars .tot{font-size:9.5px;font-weight:800;margin-bottom:3px;white-space:nowrap}
+.bars .stk{width:100%;display:flex;flex-direction:column;border-radius:6px 6px 3px 3px;overflow:hidden}
+.bars .s{display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:800}
+.bars .lb{font-size:9.5px;color:var(--txt2);margin-top:5px;white-space:nowrap}
+.bars .c.hot .lb,.bars .c.hot .tot{color:var(--pd);font-weight:800}
+.lgd{display:flex;justify-content:center;gap:14px;padding:7px 0 11px;font-size:11px;color:var(--txt2);flex-wrap:wrap}
+.lgd i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;font-style:normal}
+.avg{text-align:center;font-size:11px;color:var(--txt2);padding:0 12px 12px;line-height:1.75}
+.avg b{color:var(--pd)}
+
+/* 疫苗/用药 */
+.vac .r{display:flex;align-items:center;gap:9px;padding:10px 13px;border-bottom:1px solid var(--bd)}
+.vac .r:last-child{border-bottom:none}
+.vac .ic{width:34px;height:34px;line-height:34px;text-align:center;border-radius:12px;font-size:16px;flex-shrink:0}
+.vac .b{flex:1;min-width:0}
+.vac .k{font-size:12.5px;font-weight:700}
+.vac .v{font-size:10.5px;color:var(--txt2);margin-top:1px}
+.empty{padding:26px 18px;text-align:center;color:var(--txt2)}
+.empty .em{font-size:34px}
+.empty .t1{font-size:13.5px;font-weight:700;color:var(--txt);margin-top:7px}
+.empty .t2{font-size:11.5px;margin-top:5px;line-height:1.75}
+
+/* 说明 */
+.note{background:linear-gradient(160deg,#FFFEF5,#FFFCF0);border-left:4px solid #F5DC86;border-radius:14px;padding:12px 13px;margin-bottom:11px}
+.note h4{font-size:12.5px;color:#B08A00;margin-bottom:6px;font-weight:800}
+.note ol{margin-left:15px;font-size:11.5px;color:#7A7078;line-height:1.95}
+.note .hi{margin-top:7px;font-size:11.5px;color:var(--pd);font-weight:700}
+.tip{background:linear-gradient(160deg,var(--p4),#fff);border-radius:14px;padding:11px 13px;font-size:11.5px;color:var(--pd);line-height:1.75;margin-bottom:11px;border:1.5px solid var(--p3)}
+.step{padding:12px 14px;font-size:12.5px;line-height:2}
+.step b{color:var(--pd)}
+.scan{border:2px dashed var(--p3);border-radius:20px;background:#fff;padding:22px 16px;text-align:center;margin-bottom:11px}
+.scan .em{font-size:34px}
+.scan .t1{font-size:14.5px;font-weight:800;margin-top:5px}
+.scan .t2{font-size:11.5px;color:var(--txt2);margin-top:5px;line-height:1.75}
+
+.foot{display:flex;justify-content:space-around;background:linear-gradient(180deg,#FF9DAE,#FF8FA3);padding:10px 0 13px;color:rgba(255,255,255,.72);font-size:10px;text-align:center;margin-top:4px;border-radius:22px 22px 0 0}
+.foot div i{display:block;font-size:19px;font-style:normal}
+.foot div.on{color:#fff;font-weight:700}
+
+/* ===== 横向滚动图表 ===== */
+.hint{display:flex;align-items:center;gap:5px;padding:9px 13px 2px;font-size:10.5px;color:var(--pd);font-weight:700}
+.hint em{font-style:normal;margin-left:auto;color:var(--txt2);font-weight:500}
+.crow{display:flex;align-items:flex-start;padding:4px 8px 8px 4px}
+.axis{width:30px;flex-shrink:0;position:relative;padding-top:16px}
+.axis.mh{height:150px}
+.axis.sh{height:300px}
+.axis .al{position:absolute;right:3px;font-size:8.5px;color:var(--txt2);transform:translateY(-50%);white-space:nowrap}
+.axis .unit{position:absolute;top:0;right:3px;font-size:8px;color:var(--txt2)}
+/* rtl 技巧：默认停在右端（最新日期），向左滑看更早 */
+.hs{flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;direction:rtl;padding-bottom:5px}
+.hs::-webkit-scrollbar{height:5px}
+.hs::-webkit-scrollbar-track{background:#FAF4F6;border-radius:3px}
+.hs::-webkit-scrollbar-thumb{background:var(--p3);border-radius:3px}
+.hsin{direction:ltr;display:flex;width:max-content;padding-top:16px}
+.col{width:52px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;margin-right:5px}
+.col:last-child{margin-right:0}
+.col.today .dl,.col.today .dw{color:var(--pd);font-weight:800}
+.col.today .tv{color:var(--pd)}
+.col.we .dw{color:#E08A9C}
+.col.na{opacity:.4}
+.dl{font-size:9.5px;color:var(--txt);font-weight:700;margin-top:6px;white-space:nowrap}
+.dw{font-size:8.5px;color:var(--txt2);white-space:nowrap;margin-top:1px}
+.tv{font-size:9.5px;font-weight:800;color:var(--txt);margin-bottom:4px;white-space:nowrap;height:13px}
+
+/* 奶量逐次分段柱 */
+.mstk{width:44px;height:150px;display:flex;flex-direction:column-reverse;gap:2px;justify-content:flex-start}
+.mseg{border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.16);min-height:9px}
+.m-f{background:linear-gradient(180deg,#FFC68F,#F5A758)}
+.m-s{background:linear-gradient(180deg,#FFE49E,#F5CE6A);color:#8A6A18;text-shadow:none}
+.ph{width:44px;border-radius:8px;border:1.5px dashed #EBE0E5;background:repeating-linear-gradient(45deg,#FDFAFB,#FDFAFB 5px,#F8F2F5 5px,#F8F2F5 10px);display:flex;align-items:center;justify-content:center;font-size:9px;color:#C6BAC1;text-align:center;line-height:1.35}
+
+/* 睡眠甘特 */
+.sg{position:relative;width:44px;height:300px;background:linear-gradient(180deg,#FDFBFC,#FFFAFC);border-radius:8px;overflow:hidden}
+.sg.alt{background:linear-gradient(180deg,#FFF6F9,#FFFCFD)}
+.sgl{position:absolute;left:0;right:0;height:1px;background:#F3E9ED}
+.ss{position:absolute;left:3px;right:3px;background:linear-gradient(180deg,#A5B6EF,#7E8FD6);border-radius:5px;box-shadow:0 1px 3px rgba(126,143,214,.32)}
+
+/* ===== 兜底：无论 radio 状态如何，默认显示 8/2 + 今日Tab ===== */
+.app .h2{display:block}
+.app .s2{display:block}
+.app .blk2{display:block}
+.app .p1{display:block}
+.tabs label[for=t1]{background:linear-gradient(160deg,#FFA8B8,#FF8FA3);color:#fff;font-weight:800}
+
+/* 状态联动（radio 生效时覆盖兜底） */
+#d1:checked~.app .h2,#d1:checked~.app .s2,#d1:checked~.app .blk2{display:none}
+#d1:checked~.app .h1,#d2:checked~.app .h2{display:block}
+#d1:checked~.app .s1,#d2:checked~.app .s2{display:block}
+#d1:checked~.app .blk1,#d2:checked~.app .blk2{display:block}
+#t2:checked~.app .p1,#t3:checked~.app .p1,#t4:checked~.app .p1,
+#t5:checked~.app .p1,#t6:checked~.app .p1,#t7:checked~.app .p1,#t8:checked~.app .p1{display:none}
+#t2:checked~.app label[for=t1],#t3:checked~.app label[for=t1],#t4:checked~.app label[for=t1],
+#t5:checked~.app label[for=t1],#t6:checked~.app label[for=t1],#t7:checked~.app label[for=t1],
+#t8:checked~.app label[for=t1]{background:#FDFAFB;color:var(--txt2);font-weight:400}
+#t1:checked~.app .p1,#t2:checked~.app .p2,#t3:checked~.app .p3,#t4:checked~.app .p4x,
+#t5:checked~.app .p5,#t6:checked~.app .p6,#t7:checked~.app .p7,#t8:checked~.app .p8{display:block}
+#t1:checked~.app label[for=t1],#t2:checked~.app label[for=t2],#t3:checked~.app label[for=t3],
+#t4:checked~.app label[for=t4],#t5:checked~.app label[for=t5],#t6:checked~.app label[for=t6],
+#t7:checked~.app label[for=t7],#t8:checked~.app label[for=t8]{background:linear-gradient(160deg,var(--p2),var(--p1));color:#fff;font-weight:800;box-shadow:0 3px 9px rgba(255,143,163,.4)}
+</style>
+</head>
+<body>
+<input class="ctl" type="radio" name="day" id="d1"><input class="ctl" type="radio" name="day" id="d2" checked>
+<input class="ctl" type="radio" name="tab" id="t1" checked><input class="ctl" type="radio" name="tab" id="t2">
+<input class="ctl" type="radio" name="tab" id="t3"><input class="ctl" type="radio" name="tab" id="t4">
+<input class="ctl" type="radio" name="tab" id="t5"><input class="ctl" type="radio" name="tab" id="t6">
+<input class="ctl" type="radio" name="tab" id="t7"><input class="ctl" type="radio" name="tab" id="t8">
+
+<div class="app">
+<div class="vbar">🌸 v10 · 月龄已按生日 2026/1/5 全表重算</div>
+
+<div class="head h2">
+  <div class="av">👶</div><div class="nm">嘟嘟</div><div class="age">6 个月 28 天</div>
+  <div class="dnav"><label for="d1">‹</label><div class="ttl">8月2日 周日</div><label class="off" for="d2">›</label></div>
+  <div class="pill">出生后第 210 天</div>
+</div>
+<div class="head h1">
+  <div class="av">👶</div><div class="nm">嘟嘟</div><div class="age">6 个月 27 天</div>
+  <div class="dnav"><label class="off" for="d1">‹</label><div class="ttl">8月1日 周六</div><label for="d2">›</label></div>
+  <div class="pill">出生后第 209 天</div>
+</div>
+
+<div class="sum s2"><div class="row">
+  <div class="it"><div class="ic" style="background:var(--peachL)">🍼</div><div class="n">5次</div><div class="u">770ml</div><div class="l">奶量</div></div>
+  <div class="it"><div class="ic" style="background:var(--lemonL)">🥣</div><div class="n">1次</div><div class="u">11:50</div><div class="l">正餐</div></div>
+  <div class="it"><div class="ic" style="background:var(--lilacL)">😴</div><div class="n">12h50</div><div class="u">6段</div><div class="l">睡眠</div></div>
+  <div class="it"><div class="ic" style="background:#F4EFEB">💩</div><div class="n">1次</div><div class="u">黄·少</div><div class="l">大便</div></div>
+</div></div>
+<div class="sum s1"><div class="row">
+  <div class="it"><div class="ic" style="background:var(--peachL)">🍼</div><div class="n">5次</div><div class="u">760ml</div><div class="l">奶量</div></div>
+  <div class="it"><div class="ic" style="background:var(--lemonL)">🥣</div><div class="n">1次</div><div class="u">12:00</div><div class="l">正餐</div></div>
+  <div class="it"><div class="ic" style="background:var(--lilacL)">😴</div><div class="n">13h35</div><div class="u">5段</div><div class="l">睡眠</div></div>
+  <div class="it"><div class="ic" style="background:#F4EFEB">💩</div><div class="n">1次</div><div class="u">黄·正常</div><div class="l">大便</div></div>
+</div></div>
+
+<div class="tabs">
+  <label for="t1"><i>🍼</i>今日</label><label for="t2"><i>🥣</i>辅食</label>
+  <label for="t3"><i>📚</i>早教</label><label for="t4"><i>📈</i>生长</label>
+  <label for="t5"><i>💉</i>疫苗</label><label for="t6"><i>💊</i>用药</label>
+  <label for="t7"><i>📊</i>汇总</label><label for="t8"><i>📷</i>识别</label>
+</div>
+
+<!-- ===== 8月2日 ===== -->
+<div class="dayblk blk2">
+<div class="pane p1">
+  <div class="card"><h3>📋 今日时间线<span class="bdg nu">第210天</span></h3><div class="tl">
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">03:00</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">03:10</div><div class="b"><div class="k">睡觉</div><div class="v">→ 07:15 ｜ 4小时5分</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--skyL)">🌞</div><div class="t">07:15</div><div class="b"><div class="k">起床</div></div></div>
+    <div class="ev"><div class="ic" style="background:#F4EFEB">💩</div><div class="t">07:30</div><div class="b"><div class="k">便便</div><div class="v">量大 · 黄色 · 偏少</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">08:00</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">08:45</div><div class="b"><div class="k">睡觉</div><div class="v">→ 09:15 ｜ 30分钟</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lemonL)">🥣</div><div class="t">11:50</div><div class="b"><div class="k">正餐（辅食）＋ 奶</div><div class="v amt">130ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">12:10</div><div class="b"><div class="k">睡觉</div><div class="v">→ 12:50 ｜ 40分钟</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">14:45</div><div class="b"><div class="k">睡觉</div><div class="v">→ 15:15 ｜ 30分钟</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">16:00</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">17:55</div><div class="b"><div class="k">睡觉</div><div class="v">→ 18:25 ｜ 30分钟</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">19:30</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">🌙</div><div class="t">20:20</div><div class="b"><div class="k">夜间入睡</div><div class="v">→ 次日 02:20 ｜ 6小时</div></div></div>
+    <div class="nx">▽黑板底部跨夜记录 · 归属 8月3日</div>
+    <div class="ev nxd"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">02:30</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev nxd"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">02:40</div><div class="b"><div class="k">睡觉</div><div class="v">→ 07:05 ｜ 4小时25分</div></div></div>
+    <div class="ev nxd"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">08:00</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+  </div></div>
+  <div class="card"><h3>😴 睡眠分布<span class="bdg nu">12h50m</span></h3><div class="slp">
+    <div class="bar"><div style="width:13.2%"></div><div class="seg" style="width:17%"></div><div style="width:6.3%"></div><div class="seg" style="width:2.1%"></div><div style="width:12.2%"></div><div class="seg" style="width:2.8%"></div><div style="width:8.1%"></div><div class="seg" style="width:2.1%"></div><div style="width:11%"></div><div class="seg" style="width:2.1%"></div><div style="width:8.1%"></div><div class="seg" style="width:15%"></div></div>
+    <div class="ax"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>
+    <div class="lst"><b>白天小睡 4 次</b>：08:45–09:15、12:10–12:50、14:45–15:15、17:55–18:25<br><b>夜间长睡</b>：20:20 → 次日 02:20（6 小时）<br><b>凌晨补睡</b>：03:10 → 07:15（4小时5分）</div>
+  </div></div>
+  <div class="note"><h4>📝 黑板规则备注</h4><ol><li>宝宝睡着后不玩手机，晚上睡着后不玩手机</li><li>喝奶保持安静</li><li>宝宝未和大人对视，大人不主动逗宝宝</li><li>宝宝睡醒后保持 3 分钟安静</li><li>哄睡及睡熟之后保持安静（哄睡降低）</li></ol><div class="hi">⭐ 原则如上，宝宝身边不离人！！！</div><div class="hi">💡 每天 21 点左右阿姨拿 450ml 放冷藏</div></div>
+</div>
+<div class="pane p3">
+  <div class="card"><h3>🎯 早教训练<span class="bdg ok">10/10</span></h3><div class="chk">
+    <div class="i y"><div class="d">✓</div><span>趴卧抬头</span></div><div class="i y"><div class="d">✓</div><span>翻身</span></div>
+    <div class="i y"><div class="d">✓</div><span>抓握</span></div><div class="i y"><div class="d">✓</div><span>捏背</span></div>
+    <div class="i y"><div class="d">✓</div><span>手指脚趾按摩</span></div><div class="i y"><div class="d">✓</div><span>追视</span></div>
+    <div class="i y"><div class="d">✓</div><span>户外 2 小时</span></div><div class="i y"><div class="d">✓</div><span>讲布书</span></div>
+    <div class="i y"><div class="d">✓</div><span>听英文歌 90分钟</span></div><div class="i y"><div class="d">✓</div><span>晚安绘本</span></div>
+  </div></div>
+  <div class="card"><h3>🧴 每日护理<span class="bdg wt">3/9</span></h3><div class="chk">
+    <div class="i y"><div class="d">✓</div><span>洗脸</span></div><div class="i y"><div class="d">✓</div><span>洗屁屁</span></div>
+    <div class="i y"><div class="d">✓</div><span>洗腋下</span></div><div class="i"><div class="d">○</div><span>抹面霜</span></div>
+    <div class="i"><div class="d">○</div><span>抹屁屁霜</span></div><div class="i"><div class="d">○</div><span>测体温</span></div>
+    <div class="i"><div class="d">○</div><span>吃 AD</span></div><div class="i"><div class="d">○</div><span>洗澡</span></div>
+    <div class="i"><div class="d">○</div><span>刷牙</span></div>
+  </div><div class="avg" style="text-align:left;padding-top:8px">※ 黑板上这 6 项未见勾选，按「未完成」保留，未替你补勾</div></div>
+  <div class="card"><h3>⭐ 记得加餐</h3><div class="rate">★★☆☆☆</div></div>
+</div>
+</div>
+
+<!-- ===== 8月1日 ===== -->
+<div class="dayblk blk1">
+<div class="pane p1">
+  <div class="card"><h3>📋 今日时间线<span class="bdg nu">第209天</span></h3><div class="tl">
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">01:45</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">02:05</div><div class="b"><div class="k">睡觉</div><div class="v">→ 07:30 ｜ 5小时25分</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--skyL)">🌞</div><div class="t">07:30</div><div class="b"><div class="k">起床</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">07:55</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">09:00</div><div class="b"><div class="k">睡觉</div><div class="v">→ 09:30 ｜ 30分钟</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lemonL)">🥣</div><div class="t">12:00</div><div class="b"><div class="k">正餐（辅食）＋ 奶</div><div class="v amt">130ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">12:20</div><div class="b"><div class="k">睡觉</div><div class="v">→ 15:10 ｜ 2小时50分</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">16:00</div><div class="b"><div class="k">奶</div><div class="v amt">150ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">17:55</div><div class="b"><div class="k">睡觉</div><div class="v">→ 18:20 ｜ 25分钟</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">19:55</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:#F4EFEB">💩</div><div class="t">20:05</div><div class="b"><div class="k">便便</div><div class="v">量大 · 黄色 · 正常</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">🌙</div><div class="t">21:10</div><div class="b"><div class="k">夜间入睡</div><div class="v">→ 次日 02:50 ｜ 5小时40分</div></div></div>
+    <div class="nx">▽ 黑板底部跨夜记录 · 归属 8月2日</div>
+    <div class="ev nxd"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">03:00</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev nxd"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">03:10</div><div class="b"><div class="k">睡觉</div><div class="v">→ 07:15 ｜ 4小时5分</div></div></div>
+  </div></div>
+  <div class="card"><h3>😴 睡眠分布<span class="bdg nu">13h35m</span></h3><div class="slp">
+    <div class="bar"><div style="width:8.7%"></div><div class="seg" style="width:22.6%"></div><div style="width:6.3%"></div><div class="seg" style="width:2.1%"></div><div style="width:11.8%"></div><div class="seg" style="width:11.8%"></div><div style="width:11.5%"></div><div class="seg" style="width:1.7%"></div><div style="width:11.8%"></div><div class="seg" style="width:11.7%"></div></div>
+    <div class="ax"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>
+    <div class="lst"><b>白天小睡 3 次</b>：09:00–09:30、12:20–15:10、17:55–18:20<br><b>夜间长睡</b>：21:10 → 次日 02:50（5小时40分）<br><b>凌晨补睡</b>：02:05 → 07:30（5小时25分）</div>
+  </div></div>
+  <div class="card"><h3>🌡️ 体温</h3><div class="step"><b>36.8 ℃</b> · 正常范围</div></div>
+  <div class="note"><h4>📝 黑板规则备注</h4><ol><li>宝宝睡着后不玩手机，晚上睡着后不玩手机</li><li>喝奶保持安静</li><li>宝宝未和大人对视，大人不主动逗宝宝</li><li>宝宝睡醒后保持 5 分钟安静</li><li>哄睡及睡熟之后保持安静（哄睡降低）</li></ol><div class="hi">⭐ 原则如上，宝宝身边不离人！！！</div><div class="hi">💡 每天 21 点左右阿姨拿 450ml 放冷藏</div></div>
+</div>
+<div class="pane p3">
+  <div class="card"><h3>🎯 早教训练<span class="bdg ok">10/10</span></h3><div class="chk">
+    <div class="i y"><div class="d">✓</div><span>趴卧抬头</span></div><div class="i y"><div class="d">✓</div><span>翻身</span></div>
+    <div class="i y"><div class="d">✓</div><span>抓握</span></div><div class="i y"><div class="d">✓</div><span>捏背</span></div>
+    <div class="i y"><div class="d">✓</div><span>手指脚趾按摩</span></div><div class="i y"><div class="d">✓</div><span>追视</span></div>
+    <div class="i y"><div class="d">✓</div><span>户外 2 小时</span></div><div class="i y"><div class="d">✓</div><span>讲布书</span></div>
+    <div class="i y"><div class="d">✓</div><span>听英文歌 90 分钟</span></div><div class="i y"><div class="d">✓</div><span>晚安绘本</span></div>
+  </div></div>
+  <div class="card"><h3>🧴 每日护理<span class="bdg ok">9/9</span></h3><div class="chk">
+    <div class="i y"><div class="d">✓</div><span>洗脸</span></div><div class="i y"><div class="d">✓</div><span>洗屁屁</span></div>
+    <div class="i y"><div class="d">✓</div><span>洗腋下</span></div><div class="i y"><div class="d">✓</div><span>抹面霜</span></div>
+    <div class="i y"><div class="d">✓</div><span>抹屁屁霜</span></div><div class="i y"><div class="d">✓</div><span>测体温 36.8℃</span></div>
+    <div class="i y"><div class="d">✓</div><span>吃 AD</span></div><div class="i y"><div class="d">✓</div><span>洗澡</span></div>
+    <div class="i y"><div class="d">✓</div><span>刷牙</span></div>
+  </div></div>
+  <div class="card"><h3>⭐ 记得加餐</h3><div class="rate">★★★☆☆</div></div>
+</div>
+</div>
+
+<!-- ===== ② 辅食排敏 ===== -->
+<div class="pane p2">
+
+  <div class="card"><h3>🎯 排敏总进度<span class="bdg ok">12 种已排敏</span></h3>
+    <div class="meal">
+      <div style="display:flex;gap:6px;margin-bottom:11px">
+        <div style="flex:1;background:var(--sageL);border-radius:14px;padding:10px 4px;text-align:center">
+          <div style="font-size:19px;font-weight:800;color:#67833A">12</div>
+          <div style="font-size:9.5px;color:#7E9450">已排敏</div></div>
+        <div style="flex:1;background:var(--lemonL);border-radius:14px;padding:10px 4px;text-align:center">
+          <div style="font-size:19px;font-weight:800;color:#C6913A">0</div>
+          <div style="font-size:9.5px;color:#B08A45">试敏中</div></div>
+        <div style="flex:1;background:#FFEAEE;border-radius:14px;padding:10px 4px;text-align:center">
+          <div style="font-size:19px;font-weight:800;color:#D4576E">0</div>
+          <div style="font-size:9.5px;color:#C4707F">已过敏</div></div>
+        <div style="flex:1;background:var(--lilacL);border-radius:14px;padding:10px 4px;text-align:center">
+          <div style="font-size:19px;font-weight:800;color:#8A6FC4">13</div>
+          <div style="font-size:9.5px;color:#9781CC">待排敏</div></div>
+      </div>
+      <div style="font-size:11.5px;color:var(--txt2);line-height:1.7">你的规则：<b style="color:#67833A">备注没写过敏 = 已排敏</b>。<br><b style="color:#67833A">同类绿叶菜交叉不需重复排 3 天</b>，吃过1 天即视为通过。</div>
+    </div>
+  </div>
+
+  <div class="card"><h3>✅ 已排敏<em style="margin-left:auto;font-size:11px;font-weight:500;color:var(--txt2)">吃满 3 天 · 无过敏</em></h3>
+    <div class="meal">
+      <div style="font-size:11px;font-weight:800;color:var(--txt2);margin-bottom:6px">🌾 主食 / 油脂</div>
+      <div class="food">
+        <span class="f-ok">米粉</span><span class="f-ok">核桃油</span><span class="f-ok">亚麻籽油</span>
+      </div>
+      <div style="font-size:11px;font-weight:800;color:var(--txt2);margin:12px 0 6px">🥬 菜叶类<span style="font-weight:500;color:#67833A"> · 同类免重复排敏</span></div>
+      <div class="food">
+        <span class="f-ok">菠菜 D6</span><span class="f-ok">油菜</span><span class="f-ok">娃娃菜</span><span class="f-ok">油麦菜</span>
+      </div>
+      <div style="font-size:11px;font-weight:800;color:var(--txt2);margin:12px 0 6px">🥕 根茎 / 瓜果类</div>
+      <div class="food">
+        <span class="f-ok">胡萝卜 D3</span><span class="f-ok">土豆 D3</span><span class="f-ok">南瓜 D3</span>
+      </div>
+      <div style="font-size:11px;font-weight:800;color:var(--txt2);margin:12px 0 6px">🥩 肉类</div>
+      <div class="food">
+        <span class="f-ok">牛肉 D3</span><span class="f-ok">猪肉 D3</span>
+      </div>
+      <div class="avg" style="text-align:left;padding:12px 0 0">共 <b>12 种</b>，备注均无「过敏」字样 ✅<br>菜叶类：菠菜已满 D6，油菜/娃娃菜/油麦菜按<b>同类免排</b>规则通过</div>
+    </div>
+  </div>
+
+  <div class="card"><h3>🥬 绿叶菜同类免排<span class="bdg ok">已通过</span></h3>
+    <div class="meal">
+      <div class="food">
+        <span class="f-ok">菠菜 D6</span><span class="f-ok">油菜</span><span class="f-ok">娃娃菜</span><span class="f-ok">油麦菜</span>
+      </div>
+      <table style="margin-top:11px">
+        <tr><th>食材</th><th class="c">首次</th><th class="c">吃过</th><th class="c">判定</th></tr>
+        <tr><td>菠菜</td><td class="c">7/15</td><td class="c">D6</td><td class="c" style="color:#33A07A;font-weight:700">✅ 满3天</td></tr>
+        <tr><td>油菜</td><td class="c">8/2</td><td class="c">1 天</td><td class="c" style="color:#33A07A;font-weight:700">✅ 同类免排</td></tr>
+        <tr><td>娃娃菜</td><td class="c">8/3</td><td class="c">1 天</td><td class="c" style="color:#33A07A;font-weight:700">✅ 同类免排</td></tr>
+        <tr class="hot"><td>油麦菜</td><td class="c">8/4</td><td class="c">1 天</td><td class="c" style="color:#33A07A;font-weight:700">✅ 同类免排</td></tr>
+      </table>
+      <div class="avg" style="text-align:left;padding:11px 0 0">菠菜作为菜叶类<b>先锋食材</b>已完成 D1–D6 充分试敏，同类绿叶菜致敏性相近，<b>吃过 1 天无异常即视为通过</b>，无需各自重复 3 天。</div>
+    </div>
+  </div>
+
+  <div class="card"><h3>⏳ 待排敏<span class="bdg nu">13 种</span></h3>
+    <div class="meal">
+      <div class="food">
+        <span class="f-ph">西兰花 8/5</span><span class="f-ph">豌豆 8/8</span><span class="f-ph">蛋黄 8/11</span>
+        <span class="f-ph">猪肝 8/14</span><span class="f-ph">空心菜 8/16</span><span class="f-ph">鸡肉 8/17</span>
+        <span class="f-ph">红苋菜 8/21</span><span class="f-ph">鳕鱼 8/26</span><span class="f-ph">香菇 8/29</span>
+        <span class="f-ph">鲜虾 9/1</span><span class="f-ph">番茄 9/4</span><span class="f-ph">全蛋黄 9/4</span>
+        <span class="f-ph">十倍胚芽米粥 9/7</span>
+      </div>
+      <div class="avg" style="text-align:left;padding:11px 0 0">大类待排：<b>花科类 · 荚果类 · 茄果类 · 菌类 · 白肉类 · 肝脏类 · 鱼类 · 虾类</b><br>🍎 水果泥（香蕉/苹果）计划表上已划除，<b>也未执行</b></div>
+    </div>
+  </div>
+
+  <div class="card"><h3>📅 辅食执行记录<em style="margin-left:auto;font-size:11px;font-weight:500;color:var(--txt2)">倒序 · 共 33 天</em></h3>
+    <table>
+      <tr><th>日期</th><th class="c">月龄</th><th>辅食内容</th><th class="c">油</th><th>排敏</th><th class="c">派</th></tr>
+      <tr class="hot"><td>8/4 二</td><td class="c">6m30d</td><td>米粉10g＋70ml水＋牛肉泥1勺＋油麦菜1勺</td><td class="c">亚麻</td><td>油麦菜 ✅</td><td class="c">今天</td></tr>
+      <tr><td>8/3 一</td><td class="c">6m29d</td><td>米粉10g＋70ml水＋牛肉泥1勺＋娃娃菜1勺</td><td class="c">核桃</td><td>娃娃菜 ✅</td><td class="c">—</td></tr>
+      <tr><td>8/2 日</td><td class="c">6m28d</td><td>米粉10g＋70ml水＋牛肉泥1勺＋油菜1勺</td><td class="c">亚麻</td><td>油菜 ✅</td><td class="c">💧</td></tr>
+      <tr><td>8/1 六</td><td class="c">6m27d</td><td>米粉10g＋70ml水＋南瓜泥3勺</td><td class="c">核桃</td><td>南瓜 D3 ✅</td><td class="c">—</td></tr>
+      <tr><td>7/31 五</td><td class="c">6m26d</td><td>米粉10g＋70ml水＋南瓜泥2勺</td><td class="c">亚麻</td><td>南瓜 D2</td><td class="c">💧</td></tr>
+      <tr><td>7/30 四</td><td class="c">6m25d</td><td>米粉10g＋70ml水＋南瓜泥1勺</td><td class="c">核桃</td><td>南瓜 D1</td><td class="c">—</td></tr>
+      <tr><td>7/29 三</td><td class="c">6m24d</td><td>米粉10g＋70ml水＋土豆泥3勺</td><td class="c">核桃</td><td>土豆 D3 ✅</td><td class="c">💧</td></tr>
+      <tr><td>7/28 二</td><td class="c">6m23d</td><td>米粉10g＋70ml水＋土豆泥2勺</td><td class="c">亚麻</td><td>土豆 D2</td><td class="c">—</td></tr>
+      <tr><td>7/27 一</td><td class="c">6m22d</td><td>米粉10g＋70ml水＋土豆泥1勺</td><td class="c">核桃</td><td>土豆 D1</td><td class="c">—</td></tr>
+      <tr><td>7/26 日</td><td class="c">6m21d</td><td>米粉10g＋70ml水＋猪肉泥3勺＋菠菜泥3勺</td><td class="c">核桃</td><td>猪肉 D3 ✅</td><td class="c">—</td></tr>
+      <tr><td>7/25 六</td><td class="c">6m20d</td><td>米粉10g＋70ml水＋猪肉泥2勺＋菠菜泥2勺</td><td class="c">亚麻</td><td>猪肉 D2</td><td class="c">—</td></tr>
+      <tr><td>7/24 五</td><td class="c">6m19d</td><td>米粉10g＋70ml水＋猪肉泥1勺＋菠菜泥1勺</td><td class="c">核桃</td><td>猪肉 D1</td><td class="c">💧</td></tr>
+      <tr><td>7/23 四</td><td class="c">6m18d</td><td>米粉10g＋70ml水＋胡萝卜泥3勺＋菠菜泥3勺</td><td class="c">亚麻</td><td>胡萝卜 D3 ✅</td><td class="c">💧</td></tr>
+      <tr><td>7/22 三</td><td class="c">6m17d</td><td>米粉10g＋70ml水＋胡萝卜泥2勺＋菠菜泥3勺</td><td class="c">核桃</td><td>胡萝卜 D2</td><td class="c">—</td></tr>
+      <tr><td>7/21 二</td><td class="c">6m16d</td><td>米粉10g＋70ml水＋胡萝卜泥1勺＋菠菜泥3勺</td><td class="c">亚麻</td><td>胡萝卜 D1</td><td class="c">💧</td></tr>
+      <tr><td>7/20 一</td><td class="c">6m15d</td><td>米粉7.5g＋70ml水＋菠菜泥3勺</td><td class="c">核桃</td><td>菠菜 D6 ✅</td><td class="c">💧</td></tr>
+      <tr><td colspan="6" style="background:#FFF6F8;color:#D4576E;font-weight:700;font-size:11px;text-align:center">▲ 表二（6–7月龄 · 增加咀嚼粗糙度）· 12:00 正餐　｜▼ 表一（6月龄 · 初次加泥）· 10:30 辅食</td></tr>
+      <tr><td>7/19 日</td><td class="c">6m14d</td><td>米粉7.5g＋菠菜泥2勺<span style="color:var(--txt2);font-size:10px">（猪肉划除）</span></td><td class="c">亚麻</td><td>菠菜 D5<span style="font-size:9px;color:var(--txt2)">手写</span></td><td class="c">—</td></tr>
+      <tr><td>7/18 六</td><td class="c">6m13d</td><td>米粉5g＋菠菜泥1勺<span style="color:var(--txt2);font-size:10px">（猪肉划除）</span></td><td class="c">核桃</td><td>菠菜 D4<span style="font-size:9px;color:var(--txt2)">手写</span></td><td class="c">—</td></tr>
+      <tr><td>7/17 五</td><td class="c">6m12d</td><td>米粉5g＋菠菜泥3勺</td><td class="c">亚麻</td><td>菠菜 D3</td><td class="c">—</td></tr>
+      <tr><td>7/16 四</td><td class="c">6m11d</td><td>米粉5g＋菠菜泥2勺</td><td class="c">亚麻</td><td>菠菜 D2</td><td class="c">—</td></tr>
+      <tr><td>7/15 三</td><td class="c">6m10d</td><td>米粉5g＋菠菜泥1勺</td><td class="c">亚麻</td><td>菠菜 D1</td><td class="c">—</td></tr>
+      <tr><td>7/14 二</td><td class="c">6m9d</td><td>米粉5g＋牛肉泥3勺</td><td class="c">核桃</td><td>牛肉 D3 ✅</td><td class="c">—</td></tr>
+      <tr><td>7/13 一</td><td class="c">6m8d</td><td>米粉5g＋牛肉泥2勺</td><td class="c">亚麻</td><td>牛肉 D2</td><td class="c">—</td></tr>
+      <tr><td>7/12 日</td><td class="c">6m7d</td><td>米粉5g＋牛肉泥1勺</td><td class="c">核桃</td><td>牛肉 D1</td><td class="c">—</td></tr>
+      <tr><td>7/11 六</td><td class="c">6m6d</td><td>米粉5g＋水50ml</td><td class="c">亚麻2滴</td><td>换油轮换 ✅</td><td class="c">—</td></tr>
+      <tr><td>7/10 五</td><td class="c">6m5d</td><td>米粉5g＋水50ml</td><td class="c">核桃2滴</td><td>油脂适应</td><td class="c">—</td></tr>
+      <tr><td>7/9 四</td><td class="c">6m4d</td><td>米粉5g＋水50ml</td><td class="c">核桃2滴</td><td>初次加油</td><td class="c">—</td></tr>
+      <tr><td>7/8 三</td><td class="c">6m3d</td><td>米粉5g＋水60ml（吃完）</td><td class="c">无</td><td>纯米粉完成 ✅</td><td class="c">—</td></tr>
+      <tr><td>7/7 二</td><td class="c">6m2d</td><td>米粉5g＋水60ml（2/3）</td><td class="c">无</td><td>增量适应</td><td class="c">—</td></tr>
+      <tr><td>7/6 一</td><td class="c">6m1d</td><td>米粉5g＋水60ml（2/3）</td><td class="c">无</td><td>增量适应</td><td class="c">—</td></tr>
+      <tr><td>7/5 日</td><td class="c">6m0d</td><td>米粉2.5g＋水40ml（4–5 口）</td><td class="c">—</td><td>纯米粉适应</td><td class="c">—</td></tr>
+      <tr><td>7/4 六</td><td class="c">5m29d</td><td>米粉2.5g＋水40ml（3–4 口）</td><td class="c">—</td><td>纯米粉适应</td><td class="c">—</td></tr>
+      <tr><td>7/3 五</td><td class="c">5m28d</td><td>米粉2.5g＋水40ml（2–3 口）</td><td class="c">—</td><td>首次开辅 🎉</td><td class="c">—</td></tr>
+    </table>
+    <div class="avg" style="padding-top:10px">
+      共 <b>33 天</b>：表一 7/3–7/19（17 天）＋ 表二 7/20–8/4（16 天）· 全部打勾完成 ✅<br>
+      💧＝当天标注「派」（抹药派瑞松），共 <b>7 天</b><br>
+      📌 月龄按<b>生日 2026年1月5日</b>重算（由黑板反推：8/2＝第210天，8/1＝209、8/3＝211 三点吻合）<br>　纸面标注曾有跳号（7/21 写6+19、7/24 写6+16）＝表二重排排敏顺序所致，现已统一为真实月龄<br>
+      🍎 表一 16:00 水果泥栏纸上已划除，未执行
+    </div>
+  </div>
+
+  <div class="card"><h3>🔄 两张表怎么衔接</h3><div class="step" style="font-size:12px;line-height:1.95">
+    <b>表一</b>（6月龄 · 初次加泥 · 10:30）：<b>7/3 → 7/19</b>，吃到 6+17 停<br>
+    <b>表二</b>（6–7月龄 · 增加咀嚼粗糙度 · 12:00）：<b>7/20</b> 起接续<br><br>
+    表二把表一没走完的重新排了顺序：<br>
+    · 先补 <b>菠菜 D6</b>（7/20）<br>
+    · 插 <b>胡萝卜 D1–D3</b>（7/21–7/23）<br>
+    · 回补 <b>猪肉 D1–D3</b>（7/24–7/26）<br>
+    · 再走 土豆 → 南瓜 → 油菜 → 娃娃菜 → 油麦菜<br><br>
+    餐次也从 <b>10:30 挪到 12:00</b>，米粉从 5g 增到 10g，加水量固定 70ml。
+  </div></div>
+
+  <div class="card"><h3>🔜 未来计划<em style="margin-left:auto;font-size:11px;font-weight:500;color:var(--txt2)">8/5 起</em></h3>
+    <table>
+      <tr><th>日期</th><th class="c">月龄</th><th>12:00 正餐</th><th>新食材</th></tr>
+      <tr><td>8/5</td><td class="c">7m0d</td><td>米粉10g＋西兰花泥1勺＋猪肉泥1勺</td><td>西兰花 D1</td></tr>
+      <tr><td>8/6</td><td class="c">7m1d</td><td>米粉10g＋西兰花2勺＋猪肉泥1勺</td><td>西兰花 D2</td></tr>
+      <tr><td>8/7</td><td class="c">7m2d</td><td>米粉10g＋西兰花3勺＋猪肉泥1勺</td><td>西兰花 D3</td></tr>
+      <tr><td>8/8</td><td class="c">7m3d</td><td>米粉10g＋豌豆泥1勺＋牛肉1勺</td><td>豌豆 D1</td></tr>
+      <tr><td>8/9</td><td class="c">7m4d</td><td>米粉10g＋豌豆泥2勺＋牛肉1勺</td><td>豌豆 D2</td></tr>
+      <tr><td>8/10</td><td class="c">7m5d</td><td>米粉10g＋豌豆泥3勺＋牛肉1勺</td><td>豌豆 D3</td></tr>
+      <tr><td>8/11</td><td class="c">7m6d</td><td>米粉10g＋1/8 蛋黄</td><td>蛋黄 D1 单一</td></tr>
+      <tr><td>8/12</td><td class="c">7m7d</td><td>米粉10g＋1/4 蛋黄</td><td>蛋黄 D2</td></tr>
+      <tr><td>8/13</td><td class="c">7m8d</td><td>米粉10g＋1/2 蛋黄</td><td>蛋黄 D3 耐受</td></tr>
+      <tr><td>8/14</td><td class="c">7m9d</td><td>米粉10g＋猪肝泥1勺＋菠菜泥＋1/4蛋黄</td><td>肝脏 D1</td></tr>
+      <tr><td>8/15</td><td class="c">7m10d</td><td>米粉10g＋猪肝2勺＋娃娃菜泥＋1/4蛋黄</td><td>肝脏 D2</td></tr>
+      <tr><td>8/16</td><td class="c">7m11d</td><td>米粉10g＋猪肝3勺＋空心菜泥＋1/4蛋黄</td><td>肝脏D3 & 空心菜D1</td></tr>
+      <tr><td>8/17</td><td class="c">7m12d</td><td>米粉10g＋鸡肉泥1勺＋油麦菜＋1/4蛋黄</td><td>鸡肉 D1</td></tr>
+      <tr><td>8/18</td><td class="c">7m13d</td><td>米粉10g＋鸡肉泥2勺＋菠菜泥＋1/4蛋黄</td><td>鸡肉 D2</td></tr>
+      <tr><td>8/19</td><td class="c">7m14d</td><td>米粉10g＋鸡肉泥3勺＋土豆泥＋1/4蛋黄</td><td>鸡肉 D3</td></tr>
+      <tr><td>8/20</td><td class="c">7m15d</td><td>米粉10g＋牛肉泥＋胡萝卜泥＋1/4蛋黄</td><td style="color:#D4576E">疫苗前后3天不加新</td></tr>
+      <tr><td>8/21</td><td class="c">7m16d</td><td>米粉10g＋牛肉泥＋娃娃菜泥＋1/2蛋黄</td><td style="color:#D4576E">疫苗前后3天不加新</td></tr>
+      <tr><td>8/22</td><td class="c">7m17d</td><td>米粉10g＋牛肉泥＋红苋菜泥＋1/2蛋黄</td><td style="color:#D4576E">💉 打疫苗</td></tr>
+      <tr><td>8/23</td><td class="c">7m18d</td><td>米粉10g＋猪肉泥＋西兰花泥＋1/2蛋黄</td><td style="color:#D4576E">疫苗前后3天不加新</td></tr>
+      <tr><td>8/24</td><td class="c">7m19d</td><td>米粉10g＋猪肉泥＋空心菜泥＋1/2蛋黄</td><td style="color:#D4576E">疫苗前后3天不加新</td></tr>
+      <tr><td>8/25</td><td class="c">7m20d</td><td>米粉10g＋猪肉泥＋空心菜泥＋1/2蛋黄</td><td style="color:#D4576E">疫苗前后3天不加新</td></tr>
+      <tr><td>8/26</td><td class="c">7m21d</td><td>米粉10g＋鳕鱼泥1勺＋胡萝卜泥＋1/2蛋黄</td><td>鳕鱼 D1</td></tr>
+      <tr><td>8/27</td><td class="c">7m22d</td><td>米粉10g＋鳕鱼泥2勺＋娃娃菜泥＋1/2蛋黄</td><td>鳕鱼 D2</td></tr>
+      <tr><td>8/28</td><td class="c">7m23d</td><td>米粉10g＋鳕鱼泥3勺＋红苋菜泥＋1/2蛋黄</td><td>鳕鱼D3 & 红苋菜D1</td></tr>
+      <tr><td>8/29</td><td class="c">7m24d</td><td>米粉10g＋香菇泥1勺＋猪肉泥＋1/2蛋黄</td><td>香菇 D1</td></tr>
+      <tr><td>8/30</td><td class="c">7m25d</td><td>米粉10g＋香菇2勺＋猪肉泥＋1/2蛋黄</td><td>香菇 D2</td></tr>
+      <tr><td>8/31</td><td class="c">7m26d</td><td>米粉10g＋香菇3勺＋猪肉泥＋1/2蛋黄</td><td>香菇 D3</td></tr>
+      <tr><td>9/1</td><td class="c">7m27d</td><td>米粉10g＋鲜虾泥1勺＋娃娃菜泥＋1/2蛋黄</td><td>虾 D1</td></tr>
+      <tr><td>9/2</td><td class="c">7m28d</td><td>米粉10g＋鲜虾泥2勺＋菠菜泥＋1/2蛋黄</td><td>虾 D2</td></tr>
+      <tr><td>9/3</td><td class="c">7m29d</td><td>米粉10g＋鲜虾泥3勺＋西兰花泥＋1/2蛋黄</td><td>虾 D3</td></tr>
+      <tr><td>9/4</td><td class="c">7m30d</td><td>米粉15g＋90ml水＋番茄1勺＋牛肉泥＋全蛋黄</td><td>番茄 D1</td></tr>
+      <tr><td>9/5</td><td class="c">8m0d</td><td>米粉15g＋90ml水＋番茄2勺＋鳕鱼泥＋全蛋黄</td><td>番茄 D2</td></tr>
+      <tr><td>9/6</td><td class="c">8m1d</td><td>米粉15g＋90ml水＋番茄3勺＋鲜虾泥＋全蛋黄</td><td>番茄 D3</td></tr>
+      <tr><td>9/7</td><td class="c">8m2d</td><td>十倍胚芽米粥（15g＋150g水）＋鳕鱼2勺＋红苋菜＋全蛋黄</td><td>粥主食</td></tr>
+      <tr><td>9/8</td><td class="c">8m3d</td><td>十倍粥＋牛肉泥1勺＋油麦菜1勺＋全蛋黄</td><td>蛋黄粥</td></tr>
+      <tr><td>9/9</td><td class="c">8m4d</td><td>十倍粥＋猪肉泥1勺＋菠菜泥＋全蛋黄</td><td>全蛋黄</td></tr>
+    </table>
+  </div>
+
+  <div class="card"><h3>📌 计划表原则</h3><div class="step" style="font-size:12px;line-height:1.95">
+    · 每次只新增<b>1 种</b>食物，连续排敏 <b>3 天</b>，无红疹／呕吐／腹泻再加下一种<br>
+    · 吃饭固定餐椅，不逗玩交谈，单次用餐 <b>不超 20 分钟</b><br>
+    · 上午辅食吃完紧跟喂奶；辅食吃完整碗可酌情少喂奶<br>
+    · <b>接种疫苗前后 3 天，不添加任何全新食材</b><br>
+    · 7 月：米粉、肉、菜、蛋比例 <b>1:1:1:1</b><br>
+    · 蔬菜水开后焯水 1 分钟，西兰花焯水 3 分钟<br>
+    · 核桃油非必需，宝宝不爱吃可省略或隔天少量添加<br>
+    · <b style="color:#67833A">同类绿叶菜交叉不需重复排 3 天</b>（自定规则）
+  </div></div>
+
+  <div class="card"><h3>🗂️ 大类排敏进度</h3><div class="step" style="font-size:12px;line-height:1.95">
+    计划：<b>根茎类 · 菜叶类 · 花科类 · 茄果类 · 荚果类 · 瓜果类 · 菌类 · 红肉类 · 白肉类 · 肝脏类 · 鱼类 · 虾类</b>，逐步增加水果<br><br>
+    <span style="color:#67833A;font-weight:700">✅ 已完成</span>：根茎类（土豆·胡萝卜）、瓜果类（南瓜）、红肉类（牛肉·猪肉）、<b>菜叶类（菠菜·油菜·娃娃菜·油麦菜，同类免排）</b><br>
+    <span style="color:#8A6FC4;font-weight:700">⏳ 未开始</span>：花科类（西兰花）、荚果类（豌豆）、茄果类（番茄）、菌类（香菇）、白肉类（鸡肉）、肝脏类（猪肝）、鱼类（鳕鱼）、虾类（鲜虾）、水果类
+  </div></div>
+</div>
+
+<!-- ===== ④ 生长曲线 ===== -->
+<div class="pane p4x">
+  <div class="card"><h3>📏 当前测量值<span class="bdg nu">7月18日 儿保</span></h3>
+    <div class="gcur">
+      <div class="b"><div class="ic">⚖️</div><div class="v">7.80<span style="font-size:11px">kg</span></div><div class="l">体重</div><div class="d">↑ 0.35kg</div></div>
+      <div class="b"><div class="ic">📐</div><div class="v">67.0<span style="font-size:11px">cm</span></div><div class="l">身高</div><div class="d">↑ 1.0cm</div></div>
+      <div class="b"><div class="ic">🧢</div><div class="v">43.3<span style="font-size:11px">cm</span></div><div class="l">头围</div><div class="d">↑ 0.8cm</div></div>
+    </div>
+    <div class="avg">6 个月 13 天时测量｜与上次（6月21日）相比<br>三项均<b>稳步上升</b>，处于 WHO 参考区间内 ✅</div>
+  </div>
+
+  <div class="card"><h3>📈 身高 / 体重曲线<span class="bdg nu">0–12 个月</span></h3>
+  <div class="gwrap">
+  <svg viewBox="0 0 360 290" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+    <defs>
+      <linearGradient id="gw" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B7E3C8" stop-opacity=".5"/><stop offset="1" stop-color="#DCF2E4" stop-opacity=".3"/></linearGradient>
+      <linearGradient id="gh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B9DCF2" stop-opacity=".5"/><stop offset="1" stop-color="#DEEFFA" stop-opacity=".3"/></linearGradient>
+    </defs>
+    <rect x="40" y="20" width="290" height="230" fill="#FFFEFB" stroke="#EDE3E7"/>
+    <!-- 身高 P3-P97 带 -->
+    <path d="M40,243 L112,167 L184,130 L257,102 L330,86 L330,42 L257,58 L184,80 L112,120 L40,197 Z" fill="url(#gh)"/>
+    <!-- 体重 P3-P97 带 -->
+    <path d="M40,239 L112,181 L184,149 L257,133 L330,119 L330,66 L257,80 L184,97 L112,114 L40,195 Z" fill="url(#gw)"/>
+    <!-- 网格 -->
+    <g stroke="#F0E6EA" stroke-dasharray="2,3">
+      <line x1="40" y1="66" x2="330" y2="66"/><line x1="40" y1="112" x2="330" y2="112"/>
+      <line x1="40" y1="158" x2="330" y2="158"/><line x1="40" y1="204" x2="330" y2="204"/>
+      <line x1="112" y1="20" x2="112" y2="250"/><line x1="184" y1="20" x2="184" y2="250"/><line x1="257" y1="20" x2="257" y2="250"/>
+    </g>
+    <!-- 身高折线 -->
+    <polyline fill="none" stroke="#5EA8D8" stroke-width="2.2" stroke-linejoin="round"
+      points="40,217 77,168 95,158 123,145 136,138 156,114 174,112 195,105"/>
+    <g fill="#5EA8D8"><circle cx="40" cy="217" r="2.8"/><circle cx="77" cy="168" r="2.8"/><circle cx="95" cy="158" r="2.8"/><circle cx="123" cy="145" r="2.8"/><circle cx="136" cy="138" r="2.8"/><circle cx="156" cy="114" r="2.8"/><circle cx="174" cy="112" r="2.8"/><circle cx="195" cy="105" r="4" stroke="#fff" stroke-width="1.6"/></g>
+    <!-- 体重折线 -->
+    <polyline fill="none" stroke="#3FA877" stroke-width="2.2" stroke-linejoin="round"
+      points="40,220 77,183 95,165 106,155 116,151 123,147 136,141 156,133 174,125 195,117"/>
+    <g fill="#3FA877"><circle cx="40" cy="220" r="2.8"/><circle cx="77" cy="183" r="2.8"/><circle cx="95" cy="165" r="2.8"/><circle cx="106" cy="155" r="2.8"/><circle cx="116" cy="151" r="2.8"/><circle cx="123" cy="147" r="2.8"/><circle cx="136" cy="141" r="2.8"/><circle cx="156" cy="133" r="2.8"/><circle cx="174" cy="125" r="2.8"/><circle cx="195" cy="117" r="4" stroke="#fff" stroke-width="1.6"/></g>
+    <!-- 当前值标注 -->
+    <text x="201" y="101" font-size="9" fill="#3E8FC0" font-weight="bold">67.0cm</text>
+    <text x="201" y="127" font-size="9" fill="#2E8A5E" font-weight="bold">7.80kg</text>
+    <text x="150" y="47" font-size="11" fill="#7DBBE0" font-weight="bold">身高</text>
+    <text x="240" y="215" font-size="11" fill="#72BF97" font-weight="bold">体重</text>
+    <!-- 轴标签 -->
+    <g font-size="8.5" fill="#2E8A5E" text-anchor="end"><text x="36" y="70">11</text><text x="36" y="116">9</text><text x="36" y="162">7</text><text x="36" y="208">5</text><text x="36" y="248">3</text></g>
+    <text x="36" y="31" font-size="8" fill="#2E8A5E" text-anchor="end">kg</text>
+    <g font-size="8.5" fill="#3E8FC0"><text x="334" y="70">75</text><text x="334" y="116">68</text><text x="334" y="162">61</text><text x="334" y="208">54</text><text x="334" y="248">47</text></g>
+    <text x="334" y="31" font-size="8" fill="#3E8FC0">cm</text>
+    <g font-size="9" fill="#9C919B" text-anchor="middle"><text x="40" y="263">0</text><text x="112" y="263">3</text><text x="184" y="263">6</text><text x="257" y="263">9</text><text x="330" y="263">12</text></g>
+    <text x="330" y="277" font-size="8.5" fill="#B5AAB2" text-anchor="end">月龄（个月）· WHO Child Growth Standards</text>
+  </svg>
+  </div>
+  <div class="glgd"><span><i style="background:#3FA877"></i>体重</span><span><i style="background:#5EA8D8"></i>身高</span><span><i style="background:#CFE9DA;height:9px;border-radius:3px"></i>P3–P97 参考带</span></div>
+  </div>
+
+  <div class="card"><h3>🧢 头围曲线</h3>
+  <div class="gwrap">
+  <svg viewBox="0 0 360 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+    <defs><linearGradient id="gc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D8C6F0" stop-opacity=".45"/><stop offset="1" stop-color="#EDE4F8" stop-opacity=".3"/></linearGradient></defs>
+    <rect x="40" y="16" width="290" height="130" fill="#FFFEFB" stroke="#EDE3E7"/>
+    <path d="M40,139 L112,88 L184,66 L257,54 L330,46 L330,20 L257,28 L184,38 L112,58 L40,110 Z" fill="url(#gc)"/>
+    <g stroke="#F0E6EA" stroke-dasharray="2,3"><line x1="40" y1="49" x2="330" y2="49"/><line x1="40" y1="82" x2="330" y2="82"/><line x1="40" y1="115" x2="330" y2="115"/><line x1="112" y1="16" x2="112" y2="146"/><line x1="184" y1="16" x2="184" y2="146"/><line x1="257" y1="16" x2="257" y2="146"/></g>
+    <polyline fill="none" stroke="#9B7FD4" stroke-width="2.2" stroke-linejoin="round" points="77,105 106,90 174,66 195,58"/>
+    <g fill="#9B7FD4"><circle cx="77" cy="105" r="2.8"/><circle cx="106" cy="90" r="2.8"/><circle cx="174" cy="66" r="2.8"/><circle cx="195" cy="58" r="4" stroke="#fff" stroke-width="1.6"/></g>
+    <text x="201" y="55" font-size="9" fill="#7C5FBE" font-weight="bold">43.3cm</text>
+    <g font-size="8.5" fill="#7C5FBE" text-anchor="end"><text x="36" y="52">46</text><text x="36" y="85">42</text><text x="36" y="118">38</text><text x="36" y="145">34</text></g>
+    <text x="36" y="26" font-size="8" fill="#7C5FBE" text-anchor="end">cm</text>
+    <g font-size="9" fill="#9C919B" text-anchor="middle"><text x="40" y="160">0</text><text x="112" y="160">3</text><text x="184" y="160">6</text><text x="257" y="160">9</text><text x="330" y="160">12</text></g>
+    <text x="330" y="176" font-size="8.5" fill="#B5AAB2" text-anchor="end">月龄（个月）</text>
+  </svg>
+  </div>
+  </div>
+
+  <div class="card"><h3>📋儿保测量记录<em style="margin-left:auto;font-size:11px;font-weight:500;color:var(--txt2)">共 9 次</em></h3>
+    <table>
+      <tr><th>日期</th><th class="c">月龄</th><th class="c">体重</th><th class="c">身高</th><th class="c">头围</th></tr>
+      <tr class="hot"><td>7/18</td><td class="c">6m13d</td><td class="c">7.80</td><td class="c">67.0</td><td class="c">43.3</td></tr>
+      <tr><td>6/21</td><td class="c">5m16d</td><td class="c">7.45</td><td class="c">66.0</td><td class="c">42.5</td></tr>
+      <tr><td>5/30</td><td class="c">4m25d</td><td class="c">7.10</td><td class="c">65.7</td><td class="c">—</td></tr>
+      <tr><td>5/04</td><td class="c">3m29d</td><td class="c">6.75</td><td class="c">62.0</td><td class="c">—</td></tr>
+      <tr><td>4/18</td><td class="c">3m13d</td><td class="c">6.50</td><td class="c">61.0</td><td class="c">—</td></tr>
+      <tr><td>4/09</td><td class="c">3m04d</td><td class="c">6.30</td><td class="c">—</td><td class="c">—</td></tr>
+      <tr><td>3/28</td><td class="c">2m23d</td><td class="c">6.15</td><td class="c">—</td><td class="c">40.2</td></tr>
+      <tr><td>3/14</td><td class="c">2m09d</td><td class="c">5.70</td><td class="c">59.0</td><td class="c">—</td></tr>
+      <tr><td>2/21</td><td class="c">1m16d</td><td class="c">4.90</td><td class="c">57.5</td><td class="c">38.8</td></tr>
+    </table>
+    <div class="avg" style="padding-top:10px">单位：体重 kg｜身高、头围 cm</div>
+  </div>
+
+  <div class="card"><h3>📊 增长速度分析</h3>
+    <table>
+      <tr><th>指标</th><th class="c">近 1 月</th><th class="c">近 5 月累计</th><th class="c">评价</th></tr>
+      <tr><td>体重</td><td class="c">+0.35kg</td><td class="c">+2.90kg</td><td class="c">✅ 达标</td></tr>
+      <tr><td>身高</td><td class="c">+1.0cm</td><td class="c">+9.5cm</td><td class="c">✅ 达标</td></tr>
+      <tr><td>头围</td><td class="c">+0.8cm</td><td class="c">+4.5cm</td><td class="c">✅ 达标</td></tr>
+    </table>
+    <div class="avg" style="padding-top:10px">6–7 月龄参考：体重 +0.3~0.4kg/月、身高 +1.0~1.5cm/月<br>嘟嘟三项都在正常带内，长得很稳 👏</div>
+  </div>
+
+  <div class="tip">📌 下次儿保后把身高／体重／头围告诉我（或直接发 Piyo 截图），我会追加数据点并重画曲线。</div>
+</div>
+
+<!-- ===== ⑤ 疫苗 ===== -->
+<div class="pane p5">
+  <div class="card"><h3>💉 已接种记录<span class="bdg wt">待录入</span></h3>
+    <div class="empty"><div class="em">💉</div><div class="t1">还没有疫苗数据</div>
+      <div class="t2">把接种日期和疫苗名称告诉我<br>（或发小绿本／接种记录照片）我来建档</div></div>
+  </div>
+
+  <div class="card"><h3>📅 0–7 月龄接种参考表<em style="margin-left:auto;font-size:11px;font-weight:500;color:var(--txt2)">国家免疫规划</em></h3>
+    <table>
+      <tr><th>月龄</th><th>疫苗</th><th class="c">状态</th></tr>
+      <tr><td>出生时</td><td>乙肝①、卡介苗</td><td class="c" style="color:var(--txt2)">待确认</td></tr>
+      <tr><td>1 月</td><td>乙肝②</td><td class="c" style="color:var(--txt2)">待确认</td></tr>
+      <tr><td>2 月</td><td>脊灰①（IPV）</td><td class="c" style="color:var(--txt2)">待确认</td></tr>
+      <tr><td>3 月</td><td>脊灰②、五联/百破①</td><td class="c" style="color:var(--txt2)">待确认</td></tr>
+      <tr><td>4 月</td><td>脊灰③、五联/百破②</td><td class="c" style="color:var(--txt2)">待确认</td></tr>
+      <tr><td>5 月</td><td>五联/百破③</td><td class="c" style="color:var(--txt2)">待确认</td></tr>
+      <tr class="hot"><td>6 月</td><td>乙肝③、A群流脑①</td><td class="c" style="color:var(--pd)">当前月龄</td></tr>
+      <tr><td>8 月</td><td>麻腮风①、乙脑①</td><td class="c" style="color:var(--txt2)">即将到期</td></tr>
+    </table>
+    <div class="avg" style="padding-top:10px">⚠️ 这是<b>通用参考表</b>，不代表嘟嘟已接种<br>各地程序略有差异，请以社区卫生服务中心通知为准</div>
+  </div>
+
+  <div class="card"><h3>📝 怎么录入</h3><div class="step">
+    直接跟我说，例如：<br>
+    <b>「7月20日 打了乙肝第三针」</b><br>
+    <b>「6月5日 五联第三针，左腿，无不良反应」</b><br>
+    我会记录 <b>日期 / 疫苗名 / 剂次 / 部位 / 反应</b>，并自动更新参考表状态。
+  </div></div>
+
+  <div class="tip">💡 接种后 3 天内如有发热、红肿、哭闹，告诉我我会一并记进「不良反应」栏，方便下次接种时给医生看。</div>
+</div>
+
+<!-- ===== ⑥ 用药 ===== -->
+<div class="pane p6">
+
+  <div class="card"><h3>💊 用药总览<span class="bdg ok">1 种在用</span></h3>
+    <div class="meal">
+      <div style="display:flex;gap:7px">
+        <div style="flex:1;background:var(--peachL);border-radius:14px;padding:11px 6px;text-align:center">
+          <div style="font-size:19px;font-weight:800;color:#C97A3C">7</div>
+          <div style="font-size:10px;color:#B5763F">派瑞松抹药天数</div></div>
+        <div style="flex:1;background:var(--lemonL);border-radius:14px;padding:11px 6px;text-align:center">
+          <div style="font-size:19px;font-weight:800;color:#C6913A">15</div>
+          <div style="font-size:10px;color:#B08A45">记录区间(天)</div></div>
+        <div style="flex:1;background:var(--mintL);border-radius:14px;padding:11px 6px;text-align:center">
+          <div style="font-size:19px;font-weight:800;color:#33A07A">53%</div>
+          <div style="font-size:10px;color:#3D9E78">使用频率</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card"><h3>🧴 派瑞松（外用）<span class="bdg ok">在用</span></h3>
+    <div class="vac">
+      <div class="r"><div class="ic" style="background:var(--peachL)">🧴</div>
+        <div class="b"><div class="k">派瑞松乳膏</div>
+        <div class="v">曲安奈德＋ 益康唑复方· 外用抗真菌/抗炎</div></div></div>
+      <div class="r"><div class="ic" style="background:var(--lemonL)">📅</div>
+        <div class="b"><div class="k">首次记录 7月20日</div>
+        <div class="v">最近一次 8月2日 · 共 7 天</div></div></div>
+      <div class="r"><div class="ic" style="background:var(--skyL)">✍️</div>
+        <div class="b"><div class="k">来源</div>
+        <div class="v">辅食计划表最右列手写「派」＋勾</div></div></div>
+    </div>
+  </div>
+
+  <div class="card"><h3>📅 派瑞松抹药记录<em style="margin-left:auto;font-size:11px;font-weight:500;color:var(--txt2)">7/20–8/3</em></h3>
+    <table>
+      <tr><th>日期</th><th class="c">星期</th><th class="c">抹药</th><th>备注</th></tr>
+      <tr><td>7月20日</td><td class="c">一</td><td class="c" style="color:#C97A3C;font-weight:800">✓ 派</td><td style="color:var(--txt2)">首次记录</td></tr>
+      <tr><td>7月21日</td><td class="c">二</td><td class="c" style="color:#C97A3C;font-weight:800">✓ 派</td><td style="color:var(--txt2)">连续第2天</td></tr>
+      <tr><td>7月22日</td><td class="c">三</td><td class="c" style="color:var(--txt2)">—</td><td style="color:var(--txt2)">未标注</td></tr>
+      <tr><td>7月23日</td><td class="c">四</td><td class="c" style="color:#C97A3C;font-weight:800">✓ 派</td><td style="color:var(--txt2)">—</td></tr>
+      <tr><td>7月24日</td><td class="c">五</td><td class="c" style="color:#C97A3C;font-weight:800">✓ 派</td><td style="color:var(--txt2)">连续第2天</td></tr>
+      <tr><td>7月25日</td><td class="c">六</td><td class="c" style="color:var(--txt2)">—</td><td style="color:var(--txt2)">未标注</td></tr>
+      <tr><td>7月26日</td><td class="c">日</td><td class="c" style="color:var(--txt2)">—</td><td style="color:var(--txt2)">未标注</td></tr>
+      <tr><td>7月27日</td><td class="c">一</td><td class="c" style="color:var(--txt2)">—</td><td style="color:var(--txt2)">未标注</td></tr>
+      <tr><td>7月28日</td><td class="c">二</td><td class="c" style="color:var(--txt2)">—</td><td style="color:var(--txt2)">未标注</td></tr>
+      <tr><td>7月29日</td><td class="c">三</td><td class="c" style="color:#C97A3C;font-weight:800">✓ 派</td><td style="color:var(--txt2)">间隔 5 天后恢复</td></tr>
+      <tr><td>7月30日</td><td class="c">四</td><td class="c" style="color:var(--txt2)">—</td><td style="color:var(--txt2)">未标注</td></tr>
+      <tr><td>7月31日</td><td class="c">五</td><td class="c" style="color:#C97A3C;font-weight:800">✓ 派</td><td style="color:var(--txt2)">—</td></tr>
+      <tr><td>8月1日</td><td class="c">六</td><td class="c" style="color:var(--txt2)">—</td><td style="color:var(--txt2)">未标注</td></tr>
+      <tr><td>8月2日</td><td class="c">日</td><td class="c" style="color:#C97A3C;font-weight:800">✓ 派</td><td style="color:var(--txt2)">最近一次</td></tr>
+      <tr class="hot"><td>8月3日</td><td class="c">一</td><td class="c" style="color:var(--txt2)">—</td><td style="color:var(--txt2)">今天 · 未标注</td></tr>
+    </table>
+    <div class="avg" style="padding-top:10px">15 天中 <b>7 天</b>使用｜近似隔天使用节奏<br>💡 计划表右列手写位置略有偏移，如某天标注归属有误告诉我，我来校正</div>
+  </div>
+
+  <div class="card"><h3>🗂️ 常规补充剂</h3><div class="vac">
+    <div class="r"><div class="ic" style="background:var(--lemonL)">🌞</div>
+      <div class="b"><div class="k">维生素 AD</div>
+      <div class="v">每日 1粒 · 黑板「吃AD」项打勾即视为已服</div></div><span class="bdg ok">在服</span></div>
+    <div class="r"><div class="ic" style="background:var(--sageL)">🥄</div>
+      <div class="b"><div class="k">辅食用油</div>
+      <div class="v">核桃油 / 亚麻籽油 隔天轮换（非药物）</div></div><span class="bdg ok">在用</span></div>
+    <div class="r"><div class="ic" style="background:#F4EFEB">➕</div>
+      <div class="b"><div class="k">其他补充剂</div>
+      <div class="v">如钙 / 铁 / 益生菌 / D3，告诉我即可加进来</div></div><span class="bdg wt">未设置</span></div>
+  </div></div>
+
+  <div class="card"><h3>📅 AD 服用记录</h3>
+    <table>
+      <tr><th>日期</th><th class="c">AD</th><th>来源</th></tr>
+      <tr class="hot"><td>8月2日</td><td class="c" style="color:#C6913A">未勾</td><td style="color:var(--txt2)">黑板护理项未打勾</td></tr>
+      <tr><td>8月1日</td><td class="c" style="color:#33A07A">✓ 已服</td><td style="color:var(--txt2)">黑板「吃AD ✓」</td></tr>
+    </table>
+  </div>
+
+  <div class="card"><h3>📝 怎么录入</h3><div class="step">
+    有用药的当天直接告诉我，例如：<br>
+    <b>「今天抹了派瑞松」</b><br>
+    <b>「今天 14:00 吃了美林 2.5ml，38.5℃」</b><br>
+    <b>「开了阿莫西林，每天两次，吃 5 天」</b><br>
+    我会记录 <b>时间 / 药名 / 剂量 / 原因 / 疗程</b>，并生成用药时间线。
+  </div></div>
+
+  <div class="tip">⚠️ 我只做记录和整理，不提供用药建议。派瑞松含激素成分，婴幼儿使用部位、疗程请遵医嘱。</div>
+</div>
+
+<!-- ===== ⑦ 汇总图表（横向滚动） ===== -->
+<div class="pane p7">
+
+  <div class="card"><h3>🍼 每日奶量<em style="margin-left:auto;font-size:11px;font-weight:500;color:var(--txt2)">逐次分段</em></h3>
+    <div class="hint">👈 向左滑动查看更早日期 <em>默认停在最新</em></div>
+    <div class="crow">
+      <div class="axis mh">
+        <span class="unit">ml</span>
+        <span class="al" style="top:16px">800</span>
+        <span class="al" style="top:50px">600</span>
+        <span class="al" style="top:84px">400</span>
+        <span class="al" style="top:118px">200</span>
+        <span class="al" style="top:152px">0</span>
+      </div>
+      <div class="hs"><div class="hsin">
+
+        <div class="col na"><div class="tv">—</div>
+          <div class="ph" style="height:150px">无<br>记录</div>
+          <div class="dl">7/24</div><div class="dw">周五</div></div>
+        <div class="col na"><div class="tv">—</div>
+          <div class="ph" style="height:150px">无<br>记录</div>
+          <div class="dl">7/25</div><div class="dw">周六</div></div>
+        <div class="col na"><div class="tv">—</div>
+          <div class="ph" style="height:150px">无<br>记录</div>
+          <div class="dl">7/26</div><div class="dw">周日</div></div>
+
+        <div class="col"><div class="tv">780</div>
+          <div class="mstk">
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-s" style="height:22.1px" title="正餐辅食 + 奶 130ml">130</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:28.9px" title="奶 170ml">170</div>
+          </div>
+          <div class="dl">7/27</div><div class="dw">周一</div></div>
+
+        <div class="col"><div class="tv">790</div>
+          <div class="mstk">
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-s" style="height:22.1px" title="正餐辅食 + 奶 130ml">130</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:30.6px" title="奶 180ml">180</div>
+          </div>
+          <div class="dl">7/28</div><div class="dw">周二</div></div>
+
+        <div class="col"><div class="tv">750</div>
+          <div class="mstk">
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:23.8px" title="奶 140ml">140</div>
+            <div class="mseg m-s" style="height:20.4px" title="正餐辅食 + 奶 120ml">120</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:28.9px" title="奶 170ml">170</div>
+          </div>
+          <div class="dl">7/29</div><div class="dw">周三</div></div>
+
+        <div class="col"><div class="tv">740</div>
+          <div class="mstk">
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-s" style="height:22.1px" title="正餐辅食 + 奶 130ml">130</div>
+            <div class="mseg m-f" style="height:22.1px" title="奶 130ml">130</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+          </div>
+          <div class="dl">7/30</div><div class="dw">周四</div></div>
+
+        <div class="col"><div class="tv">750</div>
+          <div class="mstk">
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:25.5px" title="奶 150ml">150</div>
+            <div class="mseg m-s" style="height:20.4px" title="正餐辅食 + 奶 120ml">120</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+            <div class="mseg m-f" style="height:27.2px" title="奶 160ml">160</div>
+          </div>
+          <div class="dl">7/31</div><div class="dw">周五</div></div>
+
+        <div class="col we"><div class="tv">760</div>
+          <div class="mstk">
+            <div class="mseg m-f" style="height:27.2px" title="01:45 奶 160ml">160</div>
+            <div class="mseg m-f" style="height:27.2px" title="07:55 奶 160ml">160</div>
+            <div class="mseg m-s" style="height:22.1px" title="12:00 正餐辅食 + 奶 130ml">130</div>
+            <div class="mseg m-f" style="height:25.5px" title="16:00 奶 150ml">150</div>
+            <div class="mseg m-f" style="height:27.2px" title="19:55 奶 160ml">160</div>
+          </div>
+          <div class="dl">8/1</div><div class="dw">周六</div></div>
+
+        <div class="col we today"><div class="tv">770</div>
+          <div class="mstk">
+            <div class="mseg m-f" style="height:27.2px" title="03:00 奶 160ml">160</div>
+            <div class="mseg m-f" style="height:27.2px" title="08:00 奶 160ml">160</div>
+            <div class="mseg m-s" style="height:22.1px" title="11:50 正餐辅食 + 奶 130ml">130</div>
+            <div class="mseg m-f" style="height:27.2px" title="16:00 奶 160ml">160</div>
+            <div class="mseg m-f" style="height:27.2px" title="19:30 奶 160ml">160</div>
+          </div>
+          <div class="dl">8/2</div><div class="dw">周日</div></div>
+
+        <div class="col"><div class="tv">320<span style="font-size:8px;color:var(--txt2)">·今天</span></div>
+          <div class="mstk">
+            <div class="mseg m-f" style="height:27.2px" title="02:30 奶 160ml">160</div>
+            <div class="mseg m-f" style="height:27.2px" title="08:00 奶 160ml">160</div>
+            <div class="ph" style="height:60px;border-radius:5px">尚未<br>结束</div>
+          </div>
+          <div class="dl">8/3</div><div class="dw">周一</div></div>
+
+      </div></div>
+    </div>
+    <div class="lgd">
+      <span><i style="background:linear-gradient(180deg,#FFC68F,#F5A758)"></i>奶</span>
+      <span><i style="background:linear-gradient(180deg,#FFE49E,#F5CE6A)"></i>该次配正餐辅食</span>
+    </div>
+    <div class="avg">7/27–8/2 平均 <b>762 ml/天</b>｜区间 740–790ml，波动 6.8%，非常稳定 👍<br>每天固定 <b>5 次</b>喂奶，其中 1 次搭配正餐辅食</div>
+  </div>
+
+  <div class="card"><h3>😴 睡眠时段分布<em style="margin-left:auto;font-size:11px;font-weight:500;color:var(--txt2)">0–24 时</em></h3>
+    <div class="hint">👈 向左滑动查看更早日期 <em>蓝块＝睡着</em></div>
+    <div class="crow">
+      <div class="axis sh">
+        <span class="al" style="top:16px">0</span>
+        <span class="al" style="top:53.5px">3</span>
+        <span class="al" style="top:91px">6</span>
+        <span class="al" style="top:128.5px">9</span>
+        <span class="al" style="top:166px">12</span>
+        <span class="al" style="top:203.5px">15</span>
+        <span class="al" style="top:241px">18</span>
+        <span class="al" style="top:278.5px">21</span>
+        <span class="al" style="top:316px">24</span>
+      </div>
+      <div class="hs"><div class="hsin">
+
+        <div class="col na"><div class="tv">—</div>
+          <div class="sg"><div class="ph" style="height:300px;width:100%">无<br>记录</div></div>
+          <div class="dl">7/24</div><div class="dw">周五</div></div>
+        <div class="col na"><div class="tv">—</div>
+          <div class="sg alt"><div class="ph" style="height:300px;width:100%">无<br>记录</div></div>
+          <div class="dl">7/25</div><div class="dw">周六</div></div>
+        <div class="col na"><div class="tv">—</div>
+          <div class="sg"><div class="ph" style="height:300px;width:100%">无<br>记录</div></div>
+          <div class="dl">7/26</div><div class="dw">周日</div></div>
+
+        <div class="col"><div class="tv">13h20</div>
+          <div class="sg alt">
+            <div class="sgl" style="top:37.5px"></div><div class="sgl" style="top:75px"></div><div class="sgl" style="top:112.5px"></div><div class="sgl" style="top:150px"></div><div class="sgl" style="top:187.5px"></div><div class="sgl" style="top:225px"></div><div class="sgl" style="top:262.5px"></div>
+            <div class="ss" style="top:0;height:12.5px" title="承接前夜 → 01:00"></div>
+            <div class="ss" style="top:21.9px;height:70.8px" title="01:45–07:25"></div>
+            <div class="ss" style="top:110.4px;height:14.6px" title="08:50–10:00"></div>
+            <div class="ss" style="top:162.5px;height:26px" title="13:00–15:05"></div>
+            <div class="ss" style="top:216.7px;height:5.2px" title="17:20–17:45"></div>
+            <div class="ss" style="top:228.1px;height:6.3px" title="18:15–18:45"></div>
+            <div class="ss" style="top:268.8px;height:31.2px" title="21:30 → 次日"></div>
+          </div>
+          <div class="dl">7/27</div><div class="dw">周一</div></div>
+
+        <div class="col"><div class="tv">13h20</div>
+          <div class="sg">
+            <div class="sgl" style="top:37.5px"></div><div class="sgl" style="top:75px"></div><div class="sgl" style="top:112.5px"></div><div class="sgl" style="top:150px"></div><div class="sgl" style="top:187.5px"></div><div class="sgl" style="top:225px"></div><div class="sgl" style="top:262.5px"></div>
+            <div class="ss" style="top:0;height:12.5px" title="承接前夜 → 01:00"></div>
+            <div class="ss" style="top:21.9px;height:72.9px" title="01:45–07:35"></div>
+            <div class="ss" style="top:110.4px;height:13.5px" title="08:50–09:55"></div>
+            <div class="ss" style="top:164.6px;height:27.1px" title="13:10–15:20"></div>
+            <div class="ss" style="top:225px;height:11.5px" title="18:00–18:55"></div>
+            <div class="ss" style="top:270.8px;height:29.2px" title="21:40 → 次日"></div>
+          </div>
+          <div class="dl">7/28</div><div class="dw">周二</div></div>
+
+        <div class="col"><div class="tv">12h30</div>
+          <div class="sg alt">
+            <div class="sgl" style="top:37.5px"></div><div class="sgl" style="top:75px"></div><div class="sgl" style="top:112.5px"></div><div class="sgl" style="top:150px"></div><div class="sgl" style="top:187.5px"></div><div class="sgl" style="top:225px"></div><div class="sgl" style="top:262.5px"></div>
+            <div class="ss" style="top:0;height:12.5px" title="承接前夜 → 01:00"></div>
+            <div class="ss" style="top:25px;height:66.7px" title="02:00–07:20"></div>
+            <div class="ss" style="top:129.2px;height:16.7px" title="10:15–11:35"></div>
+            <div class="ss" style="top:175px;height:16.7px" title="14:00–15:20"></div>
+            <div class="ss" style="top:227.1px;height:6.3px" title="18:10–18:40"></div>
+            <div class="ss" style="top:262.5px;height:37.5px" title="21:00 → 次日"></div>
+          </div>
+          <div class="dl">7/29</div><div class="dw">周三</div></div>
+
+        <div class="col"><div class="tv">12h40</div>
+          <div class="sg">
+            <div class="sgl" style="top:37.5px"></div><div class="sgl" style="top:75px"></div><div class="sgl" style="top:112.5px"></div><div class="sgl" style="top:150px"></div><div class="sgl" style="top:187.5px"></div><div class="sgl" style="top:225px"></div><div class="sgl" style="top:262.5px"></div>
+            <div class="ss" style="top:0;height:12.5px" title="承接前夜 → 01:00"></div>
+            <div class="ss" style="top:25px;height:66.7px" title="02:00–07:20"></div>
+            <div class="ss" style="top:110.4px;height:14.6px" title="08:50–10:00"></div>
+            <div class="ss" style="top:168.8px;height:14.6px" title="13:30–14:40"></div>
+            <div class="ss" style="top:222.9px;height:12.5px" title="17:50–18:50"></div>
+            <div class="ss" style="top:262.5px;height:37.5px" title="21:00 → 次日"></div>
+          </div>
+          <div class="dl">7/30</div><div class="dw">周四</div></div>
+
+        <div class="col"><div class="tv">12h55</div>
+          <div class="sg alt">
+            <div class="sgl" style="top:37.5px"></div><div class="sgl" style="top:75px"></div><div class="sgl" style="top:112.5px"></div><div class="sgl" style="top:150px"></div><div class="sgl" style="top:187.5px"></div><div class="sgl" style="top:225px"></div><div class="sgl" style="top:262.5px"></div>
+            <div class="ss" style="top:0;height:18.8px" title="承接前夜 → 01:30"></div>
+            <div class="ss" style="top:30.2px;height:57.3px" title="02:25–07:00"></div>
+            <div class="ss" style="top:110.4px;height:27.1px" title="08:50–11:00"></div>
+            <div class="ss" style="top:168.8px;height:18.8px" title="13:30–15:00"></div>
+            <div class="ss" style="top:229.2px;height:4.2px" title="18:20–18:40"></div>
+            <div class="ss" style="top:264.6px;height:35.4px" title="21:10 → 次日"></div>
+          </div>
+          <div class="dl">7/31</div><div class="dw">周五</div></div>
+
+        <div class="col we"><div class="tv">13h35</div>
+          <div class="sg">
+            <div class="sgl" style="top:37.5px"></div><div class="sgl" style="top:75px"></div><div class="sgl" style="top:112.5px"></div><div class="sgl" style="top:150px"></div><div class="sgl" style="top:187.5px"></div><div class="sgl" style="top:225px"></div><div class="sgl" style="top:262.5px"></div>
+            <div class="ss" style="top:26px;height:67.7px" title="02:05–07:30 ｜ 5小时25分"></div>
+            <div class="ss" style="top:112.5px;height:6.3px" title="09:00–09:30 ｜ 30分钟"></div>
+            <div class="ss" style="top:154.2px;height:35.4px" title="12:20–15:10 ｜ 2小时50分"></div>
+            <div class="ss" style="top:224px;height:5.2px" title="17:55–18:20 ｜ 25分钟"></div>
+            <div class="ss" style="top:264.6px;height:35.4px" title="21:10 → 次日02:50 ｜ 5小时40分"></div>
+          </div>
+          <div class="dl">8/1</div><div class="dw">周六</div></div>
+
+        <div class="col we today"><div class="tv">12h50</div>
+          <div class="sg alt">
+            <div class="sgl" style="top:37.5px"></div><div class="sgl" style="top:75px"></div><div class="sgl" style="top:112.5px"></div><div class="sgl" style="top:150px"></div><div class="sgl" style="top:187.5px"></div><div class="sgl" style="top:225px"></div><div class="sgl" style="top:262.5px"></div>
+            <div class="ss" style="top:0;height:35.4px" title="承接8/1 21:10 入睡 → 02:50"></div>
+            <div class="ss" style="top:39.6px;height:51px" title="03:10–07:15 ｜ 4小时5分"></div>
+            <div class="ss" style="top:109.4px;height:6.3px" title="08:45–09:15 ｜ 30分钟"></div>
+            <div class="ss" style="top:152.1px;height:8.3px" title="12:10–12:50 ｜ 40分钟"></div>
+            <div class="ss" style="top:184.4px;height:6.3px" title="14:45–15:15 ｜ 30分钟"></div>
+            <div class="ss" style="top:224px;height:6.3px" title="17:55–18:25 ｜ 30分钟"></div>
+            <div class="ss" style="top:254.2px;height:45.8px" title="20:20 → 次日02:20 ｜ 6小时"></div>
+          </div>
+          <div class="dl">8/2</div><div class="dw">周日</div></div>
+
+        <div class="col"><div class="tv">4h25<span style="font-size:8px;color:var(--txt2)">·今天</span></div>
+          <div class="sg">
+            <div class="sgl" style="top:37.5px"></div><div class="sgl" style="top:75px"></div><div class="sgl" style="top:112.5px"></div><div class="sgl" style="top:150px"></div><div class="sgl" style="top:187.5px"></div><div class="sgl" style="top:225px"></div><div class="sgl" style="top:262.5px"></div>
+            <div class="ss" style="top:0;height:29.2px" title="承接 8/2 20:20 入睡 → 02:20"></div>
+            <div class="ss" style="top:33.3px;height:55.2px" title="02:40–07:05 ｜ 4小时25分"></div>
+            <div class="ph" style="position:absolute;top:95px;height:205px;width:100%;border-radius:6px">待<br>记录</div>
+          </div>
+          <div class="dl">8/3</div><div class="dw">周一</div></div>
+
+      </div></div>
+    </div>
+    <div class="avg">7/27–8/2 平均 <b>13 小时 1 分钟</b>（与 Piyo 摘要一致 ✓）｜6–7 月龄推荐 12–15 小时 ✅<br>规律很清楚：<b>夜间20–22 点入睡</b>，白天 3–4 次小睡，凌晨喝奶后补一段长睡</div>
+  </div>
+
+  <div class="card"><h3>💩 便便记录</h3>
+    <table>
+      <tr><th>日期</th><th class="c">星期</th><th class="c">次数</th><th>时间 / 性状</th></tr>
+      <tr><td>7月27日</td><td class="c">一</td><td class="c">1</td><td>—</td></tr>
+      <tr><td>7月28日</td><td class="c">二</td><td class="c">1</td><td>—</td></tr>
+      <tr><td>7月29日</td><td class="c">三</td><td class="c" style="color:#D4576E">0</td><td style="color:#D4576E">未排便</td></tr>
+      <tr><td>7月30日</td><td class="c">四</td><td class="c" style="color:#D4576E">0</td><td style="color:#D4576E">未排便</td></tr>
+      <tr><td>7月31日</td><td class="c">五</td><td class="c">2</td><td>—</td></tr>
+      <tr><td>8月1日</td><td class="c">六</td><td class="c">1</td><td>20:05 · 大 · 黄 · 正常</td></tr>
+      <tr class="hot"><td>8月2日</td><td class="c">日</td><td class="c">1</td><td>07:30 · 大 · 黄 · 少</td></tr>
+    </table>
+    <div class="avg" style="padding-top:10px">7 天共 6 次｜平均 0.86 次/天<br>⚠️ 7/29–7/30 连续 2 天未排便，7/31 补排 2 次，可留意</div>
+  </div>
+
+  <div class="card"><h3>📈 关键指标</h3>
+    <table>
+      <tr><th>指标</th><th class="c">数值</th><th class="c">评价</th></tr>
+      <tr><td>日均奶量</td><td class="c">762 ml</td><td class="c">✅ 稳定</td></tr>
+      <tr><td>日均喂奶次数</td><td class="c">5 次</td><td class="c">✅ 规律</td></tr>
+      <tr><td>单次奶量区间</td><td class="c">120–180ml</td><td class="c">✅ 正常</td></tr>
+      <tr><td>日均睡眠</td><td class="c">13h01m</td><td class="c">✅ 达标</td></tr>
+      <tr><td>夜间入睡时间</td><td class="c">20–22 点</td><td class="c">✅ 规律</td></tr>
+      <tr><td>辅食执行</td><td class="c">7/7 天</td><td class="c">🎉 全勤</td></tr>
+      <tr><td>早教完成率</td><td class="c">100%</td><td class="c">🎉 满分</td></tr>
+      <tr><td>排便规律性</td><td class="c">0.86 次/天</td><td class="c">⚠️ 留意</td></tr>
+    </table>
+  </div>
+
+  <div class="tip">📌 <b>数据来源</b>：8/1–8/3 分段来自黑板照片，精确到分钟；7/27–7/31 分段读自你发的 Piyo 摘要图，<b>每次奶量数值与 Piyo 完全一致</b>，但单次时刻是按作息规律推算的近似值。补发这几天黑板照片我就能校准成精确时间。</div>
+</div>
+<!-- ===== ⑧ 识别 ===== -->
+<div class="pane p8">
+  <div class="scan"><div class="em">📸</div><div class="t1">照片 → 自动录入</div>
+    <div class="t2">黑板照片 / 辅食记录 / Piyo 截图 / 小绿本<br>都可以直接发到对话，我识别成结构化数据</div></div>
+
+  <div class="card"><h3>📥 支持识别的内容</h3><div class="vac">
+    <div class="r"><div class="ic" style="background:var(--peachL)">📋</div><div class="b"><div class="k">每日黑板</div><div class="v">喝奶 / 睡觉 / 便便 / 早教 / 护理</div></div><span class="bdg ok">已通</span></div>
+    <div class="r"><div class="ic" style="background:var(--lemonL)">🥣</div><div class="b"><div class="k">辅食记录</div><div class="v">食材明细 → 自动累积排敏清单</div></div><span class="bdg wt">待照片</span></div>
+    <div class="r"><div class="ic" style="background:var(--mintL)">📈</div><div class="b"><div class="k">Piyo 成长曲线</div><div class="v">身高 / 体重 / 头围</div></div><span class="bdg ok">已通</span></div>
+    <div class="r"><div class="ic" style="background:var(--lilacL)">💉</div><div class="b"><div class="k">预防接种证</div><div class="v">疫苗名 / 剂次 / 日期</div></div><span class="bdg wt">待照片</span></div>
+    <div class="r"><div class="ic" style="background:#FFEAEE">💊</div><div class="b"><div class="k">用药</div><div class="v">口述即可，无需照片</div></div><span class="bdg nu">口述</span></div>
+  </div></div>
+
+  <div class="card"><h3>✅ 已归档数据</h3>
+    <table>
+      <tr><th>内容</th><th class="c">范围</th><th class="c">条数</th></tr>
+      <tr class="hot"><td>每日黑板</td><td class="c">8/1–8/2</td><td class="c">2 天</td></tr>
+      <tr><td>7天汇总</td><td class="c">7/27–8/2</td><td class="c">7 天</td></tr>
+      <tr><td>儿保测量</td><td class="c">2/21–7/18</td><td class="c">9 次</td></tr>
+      <tr><td>辅食明细</td><td class="c">—</td><td class="c" style="color:#C6913A">0</td></tr>
+      <tr><td>疫苗</td><td class="c">—</td><td class="c" style="color:#C6913A">0</td></tr>
+      <tr><td>用药</td><td class="c">—</td><td class="c" style="color:#C6913A">0</td></tr>
+    </table>
+  </div>
+
+  <div class="card"><h3>💡 识别规则</h3><div class="step" style="font-size:11.5px;line-height:1.95">
+    · 黑板底部凌晨记录自动归属<b>次日</b>，不重复计入当天总量<br>
+    · 奶量与 Piyo 摘要交叉校验（8/1=760、8/2=770 已核对一致 ✓）<br>
+    · 没打勾的项保留「未完成」，不替你补勾<br>
+    · 辅食备注无「过敏」即判定<b>已排敏</b>（按你的规则）<br>
+    · 识别不清的字段我会直接问你，不猜
+  </div></div>
+
+  <div class="tip">⚠️ Piyo 是本地 App 无开放写入接口，我无法直接写入。这个工作台是 Piyo 的「镜像看板」＋Piyo 装不下的辅食排敏 / 疫苗 / 用药档案。</div>
+</div>
+
+<div class="foot"><div class="on"><i>✏️</i>记录</div><div><i>📊</i>摘要</div><div><i>📈</i>成长曲线</div><div><i>☰</i>菜单</div></div>
+</div>
+</body>
+</html>
