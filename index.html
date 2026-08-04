@@ -210,17 +210,25 @@ tr:last-child td{border-bottom:none}
 .ss{position:absolute;left:3px;right:3px;background:linear-gradient(180deg,#A5B6EF,#7E8FD6);border-radius:5px;box-shadow:0 1px 3px rgba(126,143,214,.32)}
 
 /* ===== 兜底：无论 radio 状态如何，默认显示 8/2 + 今日Tab ===== */
-.app .h2{display:grid}
-.app .s2{display:block}
-.app .blk2{display:block}
+.app .h3{display:grid}
+.app .s3{display:block}
+.app .blk3{display:block}
 .app .p1{display:block}
 .tabs label[for=t1]{background:linear-gradient(160deg,#FFA8B8,#FF8FA3);color:#fff;font-weight:800}
 
 /* 状态联动（radio 生效时覆盖兜底） */
-#d1:checked~.app .h2,#d1:checked~.app .s2,#d1:checked~.app .blk2{display:none}
-#d1:checked~.app .h1,#d2:checked~.app .h2{display:grid}
-#d1:checked~.app .s1,#d2:checked~.app .s2{display:block}
-#d1:checked~.app .blk1,#d2:checked~.app .blk2{display:block}
+#d1:checked~.app .h2,#d1:checked~.app .h3,#d1:checked~.app .s2,#d1:checked~.app .s3,#d1:checked~.app .blk2,#d1:checked~.app .blk3{display:none}
+#d2:checked~.app .h3,#d2:checked~.app .s3,#d2:checked~.app .blk3{display:none}
+#d3:checked~.app .h1,#d3:checked~.app .h2,#d3:checked~.app .s1,#d3:checked~.app .s2,#d3:checked~.app .blk1,#d3:checked~.app .blk2{display:none}
+#d1:checked~.app .h1{display:grid}
+#d2:checked~.app .h2{display:grid}
+#d3:checked~.app .h3{display:grid}
+#d1:checked~.app .s1{display:block}
+#d2:checked~.app .s2{display:block}
+#d3:checked~.app .s3{display:block}
+#d1:checked~.app .blk1{display:block}
+#d2:checked~.app .blk2{display:block}
+#d3:checked~.app .blk3{display:block}
 #t2:checked~.app .p1,#t3:checked~.app .p1,#t4:checked~.app .p1,
 #t5:checked~.app .p1,#t6:checked~.app .p1,#t7:checked~.app .p1,#t8:checked~.app .p1{display:none}
 #t2:checked~.app label[for=t1],#t3:checked~.app label[for=t1],#t4:checked~.app label[for=t1],
@@ -243,9 +251,9 @@ tr:last-child td{border-bottom:none}
 <div class="app">
 
 <div class="head h2">
-  <div class="av">👶</div><div class="nm">嘟嘟</div><div class="age">6 个月 28 天</div>
-  <div class="dnav"><label for="d1">‹</label><div class="ttl">8月2日 周日</div><label class="off" for="d2">›</label></div>
-  <div class="pill">出生后第 210 天</div>
+  <div class="av">👶</div><div class="nm">嘟嘟</div><div class="age">6 个月 29 天</div>
+  <div class="dnav"><label for="d2">‹</label><div class="ttl">8月3日 周一</div><label class="off" for="d3">›</label></div>
+  <div class="pill">出生后第 211 天</div>
 </div>
 <div class="head h1">
   <div class="av">👶</div><div class="nm">嘟嘟</div><div class="age">6 个月 27 天</div>
@@ -256,8 +264,8 @@ tr:last-child td{border-bottom:none}
 <div class="sum s2"><div class="row">
   <div class="it"><div class="ic" style="background:var(--peachL)">🍼</div><div class="n">5次</div><div class="u">770ml</div><div class="l">奶量</div></div>
   <div class="it"><div class="ic" style="background:var(--lemonL)">🥣</div><div class="n">1次</div><div class="u">11:50</div><div class="l">正餐</div></div>
-  <div class="it"><div class="ic" style="background:var(--lilacL)">😴</div><div class="n">12h50</div><div class="u">6段</div><div class="l">睡眠</div></div>
-  <div class="it"><div class="ic" style="background:#F4EFEB">💩</div><div class="n">1次</div><div class="u">黄·少</div><div class="l">大便</div></div>
+  <div class="it"><div class="ic" style="background:var(--lilacL)">😴</div><div class="n">11h45</div><div class="u">6段</div><div class="l">睡眠</div></div>
+  <div class="it"><div class="ic" style="background:#F4EFEB">💩</div><div class="n">1次</div><div class="u">正常</div><div class="l">大便</div></div>
 </div></div>
 <div class="sum s1"><div class="row">
   <div class="it"><div class="ic" style="background:var(--peachL)">🍼</div><div class="n">5次</div><div class="u">760ml</div><div class="l">奶量</div></div>
@@ -273,6 +281,55 @@ tr:last-child td{border-bottom:none}
   <label for="t7"><i>📊</i>汇总</label><label for="t8"><i>📷</i>识别</label>
 </div>
 
+<input class="ctl" type="radio" name="day" id="d3">
+<!-- ===== 8月3日 ===== -->
+<div class="dayblk blk3">
+<div class="pane p1">
+  <div class="card"><h3>📋 今日时间线<span class="bdg nu">第211天</span></h3><div class="tl">
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">02:30</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">02:40</div><div class="b"><div class="k">睡觉</div><div class="v">→ 07:05 ｜ 4小时25分</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--skyL)">🌞</div><div class="t">07:05</div><div class="b"><div class="k">起床</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">08:00</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">08:45</div><div class="b"><div class="k">睡觉</div><div class="v">→ 10:00 ｜ 1小时15分</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--skyL)">🌞</div><div class="t">10:00</div><div class="b"><div class="k">起床</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lemonL)">🥣</div><div class="t">11:50</div><div class="b"><div class="k">正餐（辅食）＋ 奶</div><div class="v amt">130ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">12:30</div><div class="b"><div class="k">睡觉</div><div class="v">→ 13:00 ｜ 30分钟</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--skyL)">🌞</div><div class="t">13:00</div><div class="b"><div class="k">起床</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">15:50</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">16:00</div><div class="b"><div class="k">睡觉</div><div class="v">→ 17:45 ｜ 1小时45分</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--skyL)">🌞</div><div class="t">17:45</div><div class="b"><div class="k">起床</div></div></div>
+    <div class="ev"><div class="ic" style="background:#F4EFEB">💩</div><div class="t">19:20</div><div class="b"><div class="k">便便</div><div class="v">量大 · 正常</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">19:45</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev"><div class="ic" style="background:var(--lilacL)">🌙</div><div class="t">21:00</div><div class="b"><div class="k">夜间入睡</div><div class="v">→ 次日 0:50 ｜ 3小时50分</div></div></div>
+    <div class="nx">▽黑板底部跨夜记录 · 归属 8月4日</div>
+    <div class="ev nxd"><div class="ic" style="background:var(--skyL)">🌞</div><div class="t">0:50</div><div class="b"><div class="k">起床</div></div></div>
+    <div class="ev nxd"><div class="ic" style="background:var(--peachL)">🍼</div><div class="t">1:00</div><div class="b"><div class="k">奶</div><div class="v amt">160ml</div></div></div>
+    <div class="ev nxd"><div class="ic" style="background:var(--lilacL)">😴</div><div class="t">1:15</div><div class="b"><div class="k">睡觉</div><div class="v">→ 07:45 ｜ 6小时30分</div></div></div>
+  </div></div>
+  <div class="card"><h3>😴 睡眠分布<span class="bdg nu">11h45m</span></h3><div class="slp">
+    <div class="bar"><div style="width:18.5%"></div><div class="seg" style="width:5.5%"></div><div style="width:9%"></div><div class="seg" style="width:2.5%"></div><div style="width:7.3%"></div><div class="seg" style="width:2%"></div><div style="width:13.8%"></div><div class="seg" style="width:2.5%"></div><div style="width:10%"></div><div class="seg" style="width:2%"></div><div style="width:12%"></div><div class="seg" style="width:14.9%"></div></div>
+    <div class="ax"><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div>
+    <div class="lst"><b>白天小睡 3 次</b>：08:45–10:00、12:30–13:00、16:00–17:45<br><b>夜间长睡</b>：21:00 → 次日 0:50（3 小时 50 分）<br><b>凌晨补睡</b>：02:40 → 07:05（4小时25分）</div>
+  </div></div>
+  <div class="note"><h4>📝 黑板规则备注</h4><ol><li>宝宝睡着后不玩手机，晚上睡着后不玩手机</li><li>喝奶保持安静</li><li>宝宝未和大人对视，大人不主动逗宝宝</li><li>宝宝睡醒后保持 3 分钟安静</li><li>哄睡及睡熟之后保持安静（哄睡降低）</li></ol><div class="hi">⭐ 原则如上，宝宝身边不离人！！！</div><div class="hi">💡 每天 21 点左右阿姨拿 450ml 放冷藏</div></div>
+</div>
+<div class="pane p3">
+  <div class="card"><h3>🎯 早教训练<span class="bdg ok">10/10</span></h3><div class="chk">
+    <div class="i y"><div class="d">✓</div><span>趴卧抬头</span></div><div class="i y"><div class="d">✓</div><span>翻身</span></div>
+    <div class="i y"><div class="d">✓</div><span>抓握</span></div><div class="i y"><div class="d">✓</div><span>捏背</span></div>
+    <div class="i y"><div class="d">✓</div><span>手指脚趾按摩</span></div><div class="i y"><div class="d">✓</div><span>追视</span></div>
+    <div class="i y"><div class="d">✓</div><span>户外 2 小时</span></div><div class="i y"><div class="d">✓</div><span>讲布书</span></div>
+    <div class="i y"><div class="d">✓</div><span>听英文歌 90分钟</span></div><div class="i y"><div class="d">✓</div><span>晚安绘本</span></div>
+  </div></div>
+  <div class="card"><h3>🧴 每日护理<span class="bdg wt">8/9</span></h3><div class="chk">
+    <div class="i y"><div class="d">✓</div><span>洗脸</span></div><div class="i y"><div class="d">✓</div><span>洗屁屁</span></div>
+    <div class="i y"><div class="d">✓</div><span>洗腋下</span></div><div class="i y"><div class="d">✓</div><span>抹面霜</span></div>
+    <div class="i y"><div class="d">✓</div><span>抹屁屁霜</span></div><div class="i y"><div class="d">✓</div><span>测体温 36.6℃</span></div>
+    <div class="i y"><div class="d">✓</div><span>吃 AD</span></div><div class="i"><div class="d">○</div><span>洗澡</span></div><div class="i y"><div class="d">✓</div><span>刷牙</span></div>
+  </div><div class="avg" style="text-align:left;padding-top:8px">※ 黑板上洗澡未见勾选，按「未完成」保留</div></div>
+  <div class="card"><h3>⭐ 记得加餐</h3><div class="rate">★★★☆☆</div></div>
+</div>
+</div>
 <!-- ===== 8月2日 ===== -->
 <div class="dayblk blk2">
 <div class="pane p1">
