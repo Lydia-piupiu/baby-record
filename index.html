@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- ── 构建标记：**为了回答「我手上这份是哪一版」** ────────────────────────
+     前几轮反复出现「家长测到的文件里解析器还是 `<li>` 切法」，查下来都是
+     **取到了旧链**（v17=93,596 / v18=95,714 / v19=97,428 / v21=120,245 …）。
+     字节数和 md5 每次都会变，光靠"我报了"不够 —— 所以把版本号**写进文件里**，
+     任何一份产物只要 `grep -n "dudu-build"` 就能自证是哪一版，不用问我。
+     解析器形态也一并写死在标记里，一眼看出换没换。 -->
+<meta name="dudu-build" content="r08 · 解析器=ev切块(A补丁52SWM4978) · pickCls=class token 匹配 · 孤儿=postImport单一裁决">
 <title>嘟嘟宝宝工作台</title>
 <style>
 /* ============ 主题：默认青色；粉色只在 .dudu-mode 作用域内生效 ============ */
@@ -223,6 +230,25 @@ input[type=date],input[type=time]{height:44px;min-height:44px;font-size:16px}
 .x{width:44px;min-height:44px;padding:0;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:18px}
 .hidden{display:none!important}
 .warnbox{background:#FFF4E5;border:1px solid #F0C98A;color:#7A4E12;border-radius:10px;padding:10px;font-size:13px;margin-bottom:10px}
+
+/* ===== 存储降级提示条（家长可见，纯提示，不阻断操作） ===== */
+.storebar{
+  background:#FFF4E5;border:1px solid #F0C98A;color:#7A4E12;
+  border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5;margin-bottom:10px;
+}
+/* ===== 📷 照片/JSON 导入 ===== */
+.thumbbox{margin-top:8px}
+.thumbbox img{max-width:100%;max-height:180px;border-radius:10px;border:1px solid var(--line);display:block}
+.pvbox{border:1px solid var(--line);border-radius:10px;background:var(--bg);margin-top:10px;padding:6px 0}
+.pvrow{display:flex;align-items:baseline;gap:8px;padding:7px 12px;font-size:14px;border-bottom:1px solid var(--line)}
+.pvrow:last-child{border-bottom:0}
+.pvrow .pvt{color:var(--tx2);font-size:12px;flex:0 0 auto;font-variant-numeric:tabular-nums}
+.pvrow .pvd{color:var(--tx2);font-size:12px;flex:0 0 auto}
+.msgbox{border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5;margin-top:10px}
+.msgbox.ok{background:#EAF7EE;border:1px solid #9FD3AF;color:#1F5C33}
+.msgbox.err{background:#FDECEC;border:1px solid #EEAAAA;color:#8A2020}
+.msgbox.info{background:#EAF1FB;border:1px solid #A9C2E8;color:#24425F}
+input[type=file]{padding:10px;min-height:52px}
 </style>
 </head>
 
@@ -247,6 +273,9 @@ input[type=date],input[type=time]{height:44px;min-height:44px;font-size:16px}
 </header>
 
 <div class="wrap">
+
+  <!-- 存储降级提示条：默认隐藏，只有检测到本地保存不可用时才显示 -->
+  <div class="storebar hidden" id="storeBar" role="status"></div>
 
   <nav class="tabs">
     <label for="tab1">🍼今日</label>
@@ -288,7 +317,50 @@ input[type=date],input[type=time]{height:44px;min-height:44px;font-size:16px}
     <section class="pane p6"><div id="p6body"></div></section>
     <section class="pane p7"><div id="p7body"></div></section>
     <section class="pane p8">
-      <div class="card"><h2>📷识别</h2>
+      <!-- ===== 照片 / JSON 导入：家长在手机上直接录 =====
+           页面本身**不做任何图像识别、不接任何外部接口**。
+           顺序固定为「选照片 → 粘贴 AI 给的记录 → 预览核对 → 确认才入库」，
+           选照片这一步**不写库**。 -->
+      <div class="card"><h2>📷 照片记录</h2>
+        <div class="field">
+          <label>① 选一张照片（只是给自己对着看，选了不会直接记进去）</label>
+          <input type="file" id="iPhoto" accept="image/*" aria-label="选择照片">
+          <div class="thumbbox hidden" id="photoThumb"><img id="photoImg" alt="刚选中的照片"></div>
+        </div>
+        <div class="field">
+          <label>② 把整理好的记录粘进来（可以直接改）</label>
+          <textarea id="iPhotoJson" rows="5"
+            placeholder='例如：[{"type":"milk","date":"2026-08-03","time":"21:00","amount":160}]'></textarea>
+          <div class="hint">
+            照片识别还在接入中，你可以先把 AI 给你的记录粘进来，一样能用。
+            没写日期的，会算到「这批记录归属哪一天」那一栏选的日期。
+          </div>
+        </div>
+        <div class="chips2">
+          <button id="btnPhotoPreview">预览</button>
+          <button class="primary" id="btnPhotoConfirm">确认导入</button>
+        </div>
+        <div class="pvbox hidden" id="photoPreview" aria-live="polite"></div>
+        <div class="msgbox hidden" id="photoMsg" role="status" aria-live="polite"></div>
+      </div>
+
+      <!-- ===== 一键迁移旧版 ===== -->
+      <div class="card" style="margin-top:10px"><h2>📦 一键迁移旧版</h2>
+        <div class="field">
+          <label>选旧版页面文件（.html / .htm）</label>
+          <input type="file" id="iMigrate" accept=".html,.htm,text/html" aria-label="选择旧版页面文件">
+        </div>
+        <div class="chips2">
+          <button class="primary" id="btnMigrate">开始迁移</button>
+          <button id="btnMigrateClear">清空选择</button>
+        </div>
+        <div class="msgbox hidden" id="migMsg" role="status" aria-live="polite"></div>
+        <div class="hint" style="margin-top:8px">
+          老页面里的记录会一份份搬进来，已经有的会自动跳过，不会重复记两遍。
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:10px"><h2>📷识别</h2>
         <div class="empty"><b>单一数据源</b>：AI 吐 JSON、或从源文件复制 HTML 片段，
           都在<b>页面内</b>解析后走同一个写入口 <code>addEvent()</code>。
           AI <b>不直接改写 HTML</b>。照片本身不入库，只留结构化结果。</div>
@@ -376,6 +448,71 @@ input[type=date],input[type=time]{height:44px;min-height:44px;font-size:16px}
 var KEY = 'dudu_v10';
 var SCHEMA = 10;
 var BIRTH = '2026-01-05';      // 首张卡原文：1/5 周一 · 第0天 → 起算点是第 0 天
+
+/* 构建标记（与 <meta name="dudu-build"> 同一份，任一处都能查）：
+   每轮交付递增 rNN。**别删** —— 它是「我手上这份是哪一版」的唯一自证手段。 */
+var DUDU_BUILD = 'r08 · 解析器=ev切块(A补丁52SWM4978) · pickCls=class token 匹配 · 孤儿=postImport单一裁决';
+console.log('[dudu] 构建 ' + DUDU_BUILD);
+
+/* ═══════════════════════════════════════════════════════════════════
+   本地存储安全封装（LS）
+   ─────────────────────────────────────────────────────────────────
+   某些预览环境（被 sandbox 的 iframe）**读 `window.localStorage` 这个属性
+   本身就抛异常**，不是 getItem 返回 null。所以：
+     · 取属性、get、set、remove **每一步都单独包 try/catch**；
+     · 拿不到就退化为**内存存储**（MEM），页面照常跑，只是关掉页面就没了；
+     · 全程**不弹原生 alert**，只显示一条家长看得懂的提示条。
+   ⚠️ 全站**任何地方都不许直接写 localStorage**，一律走 LS.get / LS.set / LS.remove。 */
+var MEM = {};                 // 降级用的内存仓库
+var LS_DEGRADED = false;      // true = 本地保存不可用，页面跑在内存态
+function lsRaw(){
+  try { var s = window.localStorage; return s ? s : null; }
+  catch(e){ return null; }
+}
+var LS = {
+  get: function(k){
+    var s = lsRaw();
+    if(s){ try { return s.getItem(k); } catch(e){} }
+    return Object.prototype.hasOwnProperty.call(MEM, k) ? MEM[k] : null;
+  },
+  set: function(k, v){
+    var s = lsRaw();
+    if(s){ try { s.setItem(k, String(v)); return true; } catch(e){} }
+    try { MEM[k] = String(v); return true; }
+    catch(e){ console.warn('[dudu] 内存存储也写不进：' + e.message); return false; }
+  },
+  remove: function(k){
+    var s = lsRaw();
+    if(s){ try { s.removeItem(k); } catch(e){} }
+    delete MEM[k];
+  }
+};
+/* 启动探测：读 + 写 + 删三条都过才算「本地保存可用」。
+   只在这里定一次 LS_DEGRADED —— 运行时偶发失败（如配额满）静默退内存，不反复弹提示。 */
+(function probeLS(){
+  var ok = false;
+  try{
+    var s = lsRaw();
+    if(s){
+      var t = '__dudu_probe__';
+      s.setItem(t, '1');
+      ok = (s.getItem(t) === '1');
+      try{ s.removeItem(t); }catch(e2){}
+    }
+  }catch(e){ ok = false; }
+  LS_DEGRADED = !ok;
+  if(LS_DEGRADED) console.warn('[dudu] 本地保存不可用 → 已降级为内存存储：'
+    + '功能照常，但关掉页面后记录不保留。');
+})();
+/* 降级提示条：家长语言，**不出现 sandbox / allow-same-origin 这类词** */
+function showStoreBar(){
+  var el = document.getElementById('storeBar');
+  if(!el) return;
+  if(!LS_DEGRADED) return;
+  el.textContent = '当前预览环境不支持保存，记录只保留到关闭页面为止；'
+                 + '请用 Safari 打开正式网址来长期保存。';
+  el.classList.remove('hidden');
+}
 var HIST_TO  = '2026-08-04';   // 末张卡原文：8/4 周二 · 6m30d · 第211天
 var HIST_SPAN = 211;           // 跨度：8/4 − 1/5 = 211（天差）
 var HIST_DAYS = HIST_SPAN + 1; // 自然日槽位：含首尾 第0天(1/5) … 第211天(8/4) = 212 天
@@ -472,14 +609,17 @@ var VACS_SEED = [
 
 /* 用药：结构是 **1 条档案 + 15 天日打卡**，不是 17 条各自独立的用药记录。
    源文件实测：只有 1 种在用药物（派瑞松）；抹药日记录 15 行，区间 7/20–8/3；
-   自报「7 派瑞松抹药天数 / 15 记录区间(天) / 53% 使用频率」，
+   源文件自报「7 派瑞松抹药天数 / 15 记录区间(天)」（另有一处自报 53% 使用频率，
+   ⚠️ **未采纳**：分母口径未核实，按家长裁定不落库、不显示，只留分子分母 7 / 15）。
    「首次记录 7月20日，最近一次 8月2日 · 共 7 天」。
    ⚠️ 哪 7 天打了勾**未导入**，所以逐日 applied 一律 null —— 不猜。
+   ⚠️ 用药记录条数 = 源文件里解析出几条就是几条，**不补、不凑整**；
+      当前只有派瑞松 1 种 + 15 天打卡，没有 AD 等其它药物的结构，就不建空壳条目。
    ⚠️ 这个结构下 ongoing:true 没有意义（不存在"各自独立的用药记录"要判起止），已删。 */
 var MEDS_SEED = [{
   id:'med_paisong', name:'派瑞松', src:'migrate',
   first:'2026-07-20', last:'2026-08-02',
-  appliedDays:7, spanDays:15, freq:0.53,
+  appliedDays:7, spanDays:15,
   /* 15 天日打卡：7/20 … 8/3，applied=null 表示「明细未导入」 */
   log:(function(){
     var out = [], b = new Date('2026-07-20T00:00:00');
@@ -641,7 +781,7 @@ var DB = {
 /* ---------- 读写 ---------- */
 function load(){
   try{
-    var raw = localStorage.getItem(KEY);
+    var raw = LS.get(KEY);
     if(!raw) return false;
     var o = JSON.parse(raw);
     if(!o || typeof o!=='object') return false;
@@ -652,8 +792,8 @@ function load(){
 }
 function save(){
   DB.updatedAt = new Date().toISOString();
-  try{ localStorage.setItem(KEY, JSON.stringify(DB)); return true; }
-  catch(e){ alert('保存失败：' + e.message); return false; }
+  /* 一律走安全封装：写不进本地就退内存，**不弹原生 alert**（弹窗会打断家长录入） */
+  return LS.set(KEY, JSON.stringify(DB));
 }
 
 /* ---------- 唯写入口 ---------- */
@@ -806,10 +946,38 @@ function buildHistSkeleton(){
    校验1 日期+星期+天数序号三元组（目标 不一致 0 / 211）
    校验2 月龄独立推算（目标 不一致 0 / 210，首张卡无月龄标注，正常跳过）
    两条都**不复用 dayLabel**，独立重算 —— 否则等于自己证明自己。 */
+/* 每张汇总卡的 wd（星期）/ nth（第几天）**一律由日期本身推算**。
+   ⚠️ 不走「从卡片 label 里正则抠『第N天』」那条路 —— 照片 / 迁移通道存下来的
+      槽位根本没有 label，那条路恒为 null（实测 211 槽 wd/nth 全为 null）。
+   口径 = **第 0 天起算**，与卡面徽章一致：
+      源文件卡面原文「1/5 周一 · 第0天」…「8/1 周六 · 6m27d · 第208天」
+      → dayNumber('2026-08-01') = 208，与徽章逐字相同。
+      （blk 时间线标题上的「第209天」是 dayblk 的第 1 天起算口径，不是卡徽章，
+        两者在源文件里就差 1，别拿它来对齐 hist。）
+   只补**空缺**，不覆盖已有值：种子自带的卡面标注是 verifyHist 的交叉校验原料，
+   被覆盖掉就等于把校验变成自己跟自己比。 */
+function fillHistMeta(){
+  var n = 0, fw = 0, fn = 0, nowW = 0, nowN = 0;
+  Object.keys(DB.hist || {}).forEach(function(k){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) return;
+    var h = DB.hist[k];
+    if(!h) return;
+    n++;
+    if(h.wd != null) nowW++;
+    else { h.wd = WEEK_CN[new Date(k + 'T00:00:00').getDay()]; fw++; }
+    if(h.nth != null) nowN++;
+    else { h.nth = dayNumber(k); fn++; }
+  });
+  if(fw || fn) console.log('[dudu] hist 补全：' + n + ' 槽中补 wd ' + fw + ' 个 · 补 nth '
+    + fn + ' 个（由日期推算；已有 ' + nowW + ' / ' + nowN + ' 个卡面原值不动）');
+  return { n:n, filledWd:fw, filledNth:fn, keptWd:nowW, keptNth:nowN };
+}
+
 function verifyHist(){
   var W = ['周日','周一','周二','周三','周四','周五','周六'];
   var b = new Date(BIRTH + 'T00:00:00');
-  var bad1 = 0, bad2 = 0, badWd = 0, nthChecked = 0, n = 0, withAge = 0, missing = 0, known = 0;
+  var bad1 = 0, bad2 = 0, badWd = 0, nthChecked = 0, wdChecked = 0,
+      n = 0, withAge = 0, missing = 0, known = 0;
   for(var i = 0; i < HIST_DAYS; i++){
     var dt = new Date(b.getFullYear(), b.getMonth(), b.getDate() + i);
     var d = fmtDate(dt), h = DB.hist[d];
@@ -824,7 +992,7 @@ function verifyHist(){
        字段缺失（骨架卡、未解析出标注）就不参与 —— 拿 undefined 去比必然 211/211 全红，
        那是谎报，会把真正错位的那一天淹掉。 */
     if(h.nth != null){ nthChecked++; if(h.nth !== i) bad1++; }
-    if(h.wd  != null && h.wd !== W[dt.getDay()]) badWd++;
+    if(h.wd  != null){ wdChecked++; if(h.wd !== W[dt.getDay()]) badWd++; }
     if(h.age == null) continue;                 // 无月龄标注（含首张卡）跳过
     withAge++;
     var m = 0, t = new Date(b.getTime());
@@ -847,7 +1015,17 @@ function verifyHist(){
   console.log('[dudu] hist ' + have + ' 张卡片 / ' + n + ' 个自然日槽位（第0天…第' + (n - 1)
               + '天）：含两端跨度 ' + n + ' 天，首尾天差 ' + (n - 1) + ' 天'
               + '／ 已知缺卡 ' + known + ' 天：' + MISSING_CARDS.join('、'));
-  return (bad1 === 0 && bad2 === 0 && badWd === 0 && missing === 0);
+  /* 比对数挂到函数上：**「比对数 0 却报 ✓」是假绿**，必须能一眼看出来。
+     早先 nth/wd 全为 null 时 nthChecked=0、badWd=0，函数照样返回 true。 */
+  var ok = (bad1 === 0 && bad2 === 0 && badWd === 0 && missing === 0);
+  verifyHist.last = { ok:ok, slots:n, cards:have, nthChecked:nthChecked, badNth:bad1,
+                      wdChecked:wdChecked, badWd:badWd, withAge:withAge, badAge:bad2,
+                      missing:missing, knownMissing:known };
+  if(nthChecked < have){
+    console.warn('[dudu] ⚠ hist 校验1 只比到 ' + nthChecked + '/' + have
+      + ' 张 —— 有 ' + (have - nthChecked) + ' 张缺 nth，属于**没比到**，不算通过');
+  }
+  return ok;
 }
 /* ---------- 导入期硬校验（定案版，2026-01-05 / 第0天起算） ----------
    差 1 天这类错位必须能**自动发现**，不能靠人眼。三条断言：
@@ -1039,6 +1217,10 @@ function deriveBlks(){
     e.orphan = (chain.indexOf(e.ownDate || e.date) >= 0);
   });
   var blkDays = days.filter(function(d){ return chain.indexOf(d) < 0; });
+  /* 解析期写在 DB.blks 上的承接候选（carryCand）**必须原样带过去** ——
+     这里整段重建 DB.blks，丢掉它的话，下一次导入的 syncOrphans 会以为「没有候选」
+     而把已经生成好的孤儿撤销掉。只带字段，不改判据。 */
+  var prevBlks = Array.isArray(DB.blks) ? DB.blks : [];
   DB.blks = blkDays.map(function(d){
     var pv = prevDay(d), nx = nextDay(d);
     var hasIn  = DB.events.some(function(e){
@@ -1047,7 +1229,9 @@ function deriveBlks(){
       return e.type === 'night' && e.crossNight && (e.ownDate || e.date) === d; });
     /* carryInFrom = 前夜源日（本体 = 它 + 1）；carryOutTo = 屏底跨夜区归属日（本体 + 1）。
        两个方向相反，早先共用一个 carryDate 名字时校验 B 四块全红。 */
-    return { date:d, carryInFrom: hasIn ? pv : null, carryOutTo: hasOut ? nx : null };
+    var ob = prevBlks.filter(function(b){ return b.date === d; })[0];
+    return { date:d, carryInFrom: hasIn ? pv : null, carryOutTo: hasOut ? nx : null,
+             carryCand: (ob && ob.carryCand) || null };
   });
   if(chain.length) console.log('[dudu] 链首日判定：' + chain.join('、')
     + '（该日仅 1 条跨夜 night，源文件无对应 dayblk）→ 已标 orphan:true');
@@ -1118,6 +1302,7 @@ function postImport(){
   purgeShadow();
   ensureEventShape(); // 睡眠段 time/time2 → start/end，任何入口进来都补
 
+  syncOrphans();  // 链首孤儿：唯一生成/撤销时机（解析期只登记候选）
   deriveBlks();   // dayblk 本体日 + 链首孤儿标记（不依赖种子里的 blk 字段）
 
   /* 空库（首次启动）不跑数值自检：events 还是 0，九个校验会打出一片 Σ=0 和 ✗，
@@ -1139,6 +1324,10 @@ function postImport(){
   var t = sleepCheck();
   var mt = milkTotal();
   flagSuspect();            // 卡片 vs 时间线不符 → 保留原值 + suspect:true，不替换
+  /* 卡的 wd / nth 由日期补齐（照片 / 迁移通道的槽位没有 label，只能这么算），
+     必须在 verifyHist 之前 —— 不然 nthChecked 恒为 0，校验是「没比到」的假绿。 */
+  var fh = fillHistMeta();
+  var vh = verifyHist();    // hist 双重全量校验：原先只挂在 boot() 上，导入后根本没跑
   verifyStats();            // hist 九个校验数
   sleepCardCheck();         // 睡眠两口径差 → 只报不改
   verifyChecklists();       // checklists 4 天归属
@@ -1166,7 +1355,10 @@ function postImport(){
             + ' ／ 逐日比对 ' + (t ? '✓ 全中' : '✗ 数据未到齐')
             + ' ／ 绝对值闸门 ' + (abs === null ? '跳过' : (abs.length ? '✗ ' + abs.join('；') : '✓')));
   return { align:a, archive:g, sleep:s, milk:m, uniq:u, target:t, abs:abs,
-           events:DB.events.length, milk:mt.ml };
+           events:DB.events.length, milk:mt.ml,
+           /* hist 补全数 + 校验结果：比对数一并挂出来，
+              免得「211 槽只比到 0 张」被当成通过 */
+           histFill:fh, hist:vh, histLast:verifyHist.last };
 }
 
 /* 便便日均：分母是 211（全量卡片数），不是 165（有排便的天数）。
@@ -1427,8 +1619,8 @@ function purgeShadow(){
 /* 旧键 dudu_feeding_v1（已作废 Demo）检测到即丢弃并提示一次，不读取、不转换 */
 function dropLegacyKey(){
   try{
-    if(localStorage.getItem('dudu_feeding_v1') !== null){
-      localStorage.removeItem('dudu_feeding_v1');
+    if(LS.get('dudu_feeding_v1') !== null){
+      LS.remove('dudu_feeding_v1');
       console.warn('[dudu] 已丢弃作废的旧键 dudu_feeding_v1（旧 Demo 结构，未读取）');
     }
   }catch(e){}
@@ -2653,7 +2845,9 @@ function renderP5(){
    ─────────────────────────────────────────────────────────────────
    ⚠️ 结构是 **1 条档案 + 15 天日打卡**，不是 17 条各自独立的用药记录。
    源文件实测：只有 1 种在用药物（派瑞松）；抹药日记录 15 行，区间 7/20–8/3；
-   自报「7 派瑞松抹药天数 / 15 记录区间(天) / 53% 使用频率」，
+   自报「7 派瑞松抹药天数 / 15 记录区间(天)」（另有一处自报 53% 使用频率 ——
+   ⚠️ **两个百分比都不显示**：46.7%（7÷15）与 53% 的分母口径都没核过，
+   按家长裁定一律撤掉，只给原始分子分母 7 / 15 天）。
    「首次记录 7月20日，最近一次 8月2日 · 共 7 天」。
    ⚠️ 哪 7 天打了勾**未导入** → 逐日 applied 一律 null，不猜。
    ⚠️ 打卡末日是 8/3，而「最近一次」是 8/2 —— 15 天是**记录区间**，
@@ -2675,21 +2869,23 @@ function renderP6(){
     var log = m.log || [];
     var applied = log.filter(function(x){ return x.applied === true; }).length;
     var unknown = log.filter(function(x){ return x.applied === null; }).length;
-    var pct = m.freq != null ? Math.round(m.freq * 100) : null;
-
+    /* ⚠️ 不显示任何百分比。
+       「46.7%」（7÷15）和源文件自报的「53%」两个数我都没核过分母口径，
+       按家长裁定**一律不显示**——只给原始分子分母 7 / 15 天，让数字自己说话。 */
     h += '<div class="card"><h2>💊' + esc(m.name) + '<span class="ro">只读</span></h2>'
        + '<div class="quad">'
        + quad('抹药天数', m.appliedDays, 'q-done')
        + quad('记录区间', m.spanDays, 'q-try')
-       + quad('使用频率', (pct == null ? '—' : pct + '%'), 'q-pend')
+       + quad('分子/分母', m.appliedDays + ' / ' + m.spanDays + ' 天', 'q-pend')
        + quad('明细已导入', applied, 'q-alg')
        + '</div>'
        + '<div class="note">首次 <b>' + (m.first ? dayLabel(m.first).md : '—')
        + '</b>　最近一次 <b>' + (m.last ? dayLabel(m.last).md : '—')
        + '</b>　共 <b>' + m.appliedDays + '</b> 天（源文件自报）。'
-       + '<br><b>「抹药天数 7」≠「记录区间 15」</b>：15 是打卡窗口的自然日跨度，'
-       + '7 是其中真抹了药的天数；频率 ' + (pct == null ? '—' : pct) + '% = 7 / 15 ≈ 46.7%，'
-       + '源文件自报 53% —— <b>两个都保留、不互相取整</b>。</div>'
+       + '<br><b>「抹药天数 ' + m.appliedDays + '」≠「记录区间 ' + m.spanDays + '」</b>：'
+       + m.spanDays + ' 是打卡窗口的自然日跨度，' + m.appliedDays + ' 是其中真抹了药的天数。'
+       + '<br>⚠️ <b>不显示百分比</b>：7÷15 ≈ 46.7% 与源文件自报 53% 两个分母口径都未核实，'
+       + '只保留原始分子分母 <b>' + m.appliedDays + ' / ' + m.spanDays + ' 天</b>。</div>'
        + '<div class="note">⚠️ 哪 <b>7</b> 天打了勾<b>未导入</b>，'
        + '所以逐日 <code>applied</code> 一律 <b>null</b>，不猜、不摊派。</div>'
        + '</div>';
@@ -2818,6 +3014,7 @@ function boot(){
   var has = load();
   ensureBaseline();                 // hist 211 天骨架 / grows 15 条 / 分类名 兜底
   if(has){ purgeShadow(); validateMigrate(); }
+  fillHistMeta();                   // 老存档（升级前存的）卡的 wd/nth 也是空的，一并补齐
   verifyHist();                     // 双重全量校验，不是抽样
   verifyAlign();                    // 导入期硬校验：hist/events 边界、第N天标注、日期连续性
 
@@ -3053,6 +3250,79 @@ function dayblkDates(){
 }
 function setDayblkDates(arr){ DAYBLK_DATES_OVERRIDE = Array.isArray(arr) ? arr.slice() : null; }
 function hasDayblk(d){ return dayblkDates().indexOf(d) >= 0; }
+
+/* ── 链首孤儿：**单一时机 + 单一判据** ──────────────────────────────────
+   解析期（parseHtmlFragment）**只登记候选到 PENDING_CARRY，一条都不生成**；
+   生成与撤销全部收敛到 syncOrphans()，由 postImport() 调用，全库只此一处。
+
+     判据 = hasDayblk(承接源日)　（源文件里真实存在的 dayblk 本体日集合）
+       ∉ 集合 → 那条夜觉在整个源文件里没有宿主块 → 生成孤儿
+       ∈ 集合 → 它有自己的 dayblk，night 会自己进库 → 不生成；已生成的撤销
+
+   ⚠️ 判据**与导入顺序无关，也不数「已导入了几块」**。两种写法都试过，都不行：
+     · 「已导入块数 ≥ 2 才生成」当门槛 —— 全逆序（8/4→8/3→8/2→8/1）会先造后撤，
+       撤不干净就丢 2 条 night，Σ 从 3330 掉到 2630。
+     · 「DB.blks（已导入集合）」当集合 —— 只导 1 块时 8/1 不在库里，
+       会被误判成孤儿，凭空多一条（与「单块导入不生成孤儿」直接冲突）。
+     两者的共同毛病是：**同一份源文件换个导入顺序就得出不同结果**，这不能接受。
+     DB.blks 是「已导入」，不是「源文件里有」——两个概念，别混。
+
+   幂等键 orphanKey = `date|start`：postImport 连调 3 次不会造出 3 条。
+   撤销只针对**带 orphanKey** 的记录：权威种子自带的孤儿是 src:'chainHead'、
+   没有 key，不会被误删；生成前也先查同 date+start 的 night，避免与种子重复。 */
+/* ⚠️ 诊断留档，**不参与裁决**：模块级数组清库时不会被清，
+   拿它当候选源会把上一轮的候选带回下一轮。裁决只读 DB.blks（见 syncOrphans）。 */
+var PENDING_CARRY = [];
+function syncOrphans(){
+  var want = {};
+  /* 候选源**只有 DB.blks 一处**：它在数据层里，清库随 DB 一起清，
+     换一轮导入就是干净的一轮，不会把上一轮的候选带回来。 */
+  (Array.isArray(DB.blks) ? DB.blks : []).forEach(function(b){
+    var c = b && b.carryCand;
+    if(!c || !c.date || !c.start) return;
+    if(hasDayblk(c.date)) return;                 // 有自己的 dayblk → 不是孤儿
+    want[c.date + '|' + c.start] = c;
+  });
+  var made = 0, dropped = 0;
+  /* ① 撤销：本机制造过的孤儿，现在判成非孤儿 → 从库里摘掉 */
+  DB.events = DB.events.filter(function(e){
+    if(!e.orphan || !e.orphanKey) return true;
+    if(want[e.orphanKey]) return true;
+    dropped++; return false;
+  });
+  /* ② 生成：候选里有、库里没有 → 造一条（先查同 night，防与种子重复） */
+  Object.keys(want).forEach(function(k){
+    var c = want[k];
+    var dup = DB.events.some(function(e){
+      return e.orphanKey === k
+          || (e.type === 'night' && (e.ownDate || e.date) === c.date
+              && (e.start || e.time) === c.start);
+    });
+    if(dup) return;
+    var rec = { date:c.date, ownDate:c.date, type:'night', time:c.start,
+                start:c.start, end:c.end, orphan:true, orphanKey:k,
+                src:'carryOrphan',
+                note:'链首孤儿：' + dayLabel(c.date).md + ' 夜间入睡（源文件无 dayblk）' };
+    if(addEvent(rec, 'carryOrphan')){
+      made++;
+      var tail = hm(rec.end) || 0;
+      if(c.claim != null && c.claim !== tail){
+        console.warn('[dudu] 承接段自校验不符：' + c.date + ' ' + c.start + '→' + rec.end
+                   + ' 算得 ' + tail + ' 分，源文件「今日计」写 ' + c.claim + ' 分');
+      }else{
+        console.log('[dudu] 链首孤儿派生（postImport 统一裁决）：' + c.date + ' '
+                   + c.start + '→' + rec.end + '  totalMin ' + rec.totalMin
+                   + '  尾巴 ' + tail + ' 分'
+                   + (c.claim != null ? ' ✓ 与源文件「今日计」一致' : '（源文件未写今日计）'));
+      }
+    }
+  });
+  if(made || dropped){
+    console.log('[dudu] 孤儿统一裁决：新增 ' + made + ' ／ 撤销 ' + dropped
+              + ' ／ 当前库内 orphan ' + DB.events.filter(function(e){return e.orphan;}).length);
+  }
+  return { made:made, dropped:dropped };
+}
 
 function parseHtmlFragment(html, d){
   /* own/nxLines 分开计：**解析装载数（79 = 64 OWN + 15 NXD）≠ 入库数（65 = 64 OWN + 1 孤儿）**。
@@ -3329,28 +3599,29 @@ function parseHtmlFragment(html, d){
        完整时长 3h20，在 24:00 处切成 7/31 得 140 分 / 8/1 得 60 分，
        后者正是源文件自己写的「今日计 1小时」，拿来自校验。
        ownDate = 7/31（统计归属），尾巴由 carryIn 计入 8/1（渲染归属），两者不混。 */
+    /* ⚠️ 孤儿**不在解析期生成**。这里只把承接候选登记进 PENDING_CARRY，
+       生成/撤销统一交给 postImport() → syncOrphans()（单一时机 + 单一判据）。
+       早先在解析期当场 addEvent，等于把判据绑在了「导入顺序 + 当时库里有什么」上。 */
     if(carry){
       res.carry++;
       if(hasDayblk(carry.date)){
         res.carryHasBlk++;
         console.log('[dudu] 承接源 ' + carry.date + ' 有自己的 dayblk（∈ 本体日集合）'
-                  + ' → 不派生孤儿，' + startT + ' 起床行照常入库');
+                  + ' → 登记为非孤儿候选，' + startT + ' 起床行照常入库');
       }else{
-        var eo = { date:carry.date, ownDate:carry.date, type:'night', time:carry.start,
-                   start:carry.start, end:startT, orphan:true,
-                   note:'链首孤儿：' + dayLabel(carry.date).md + ' 夜间入睡（源文件无 dayblk）' };
-        if(addEvent(eo, 'photo')){
-          res.events++; res.orphan++;
-          var tail = hm(eo.end) || 0;
-          if(carry.claim != null && carry.claim !== tail){
-            console.warn('[dudu] 承接段自校验不符：' + carry.date + ' ' + carry.start + '→' + eo.end
-                       + ' 算得 ' + tail + ' 分，源文件「今日计」写 ' + carry.claim + ' 分');
-          }else{
-            console.log('[dudu] 链首孤儿派生：' + carry.date + ' ' + carry.start + '→' + eo.end
-                       + '  totalMin ' + eo.totalMin + '  尾巴 ' + tail + ' 分'
-                       + (carry.claim != null ? ' ✓ 与源文件「今日计」一致' : '（源文件未写今日计）'));
-          }
-        }
+        var cand = { date:carry.date, start:carry.start, end:startT,
+                     claim:carry.claim, from:d };
+        /* ⚠️ 候选**只落在 DB.blks 里**（它是数据层的一部分，清库时随 DB 一起清）。
+           PENDING_CARRY 是**模块级数组**，清库清不掉 —— 早先它是唯一候选源，
+           「清库 → 重新导入」会把上一轮的候选带回来，候选越滚越多（1→2→3…）。
+           现在它降级为**纯诊断留档**，只供 __dudu.pendCarry() 观察，不参与裁决。 */
+        if(!Array.isArray(DB.blks)) DB.blks = [];
+        var bh = DB.blks.filter(function(b){ return b.date === d; })[0];
+        if(bh) bh.carryCand = cand;
+        else DB.blks.push({ date:d, carryCand:cand });
+        PENDING_CARRY.push(cand);
+        console.log('[dudu] 承接候选登记：' + carry.date + ' ' + carry.start + '→' + startT
+                  + '（∉ 本体日集合）→ 等 postImport 统一裁决');
       }
     }
     if(addEvent(rec, 'photo')){ res.events++; res.own++; }
@@ -3372,7 +3643,7 @@ function exportSnapshot(){
     document.body.appendChild(a); a.click();
     setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 0);
   }catch(e){}
-  try{ localStorage.setItem('dudu_v10_snapshot', s); }catch(e){}
+  LS.set('dudu_v10_snapshot', s);
   return name;
 }
 
@@ -3951,7 +4222,235 @@ function curDay(){
   return CUR_DAY || DAYS[DAYS.length-1] || null;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   ① 照片 / JSON 导入（家长手机录入通道）
+   ─────────────────────────────────────────────────────────────────
+   红线（不改）：
+     · 页面**不做任何图像识别**，**不接任何外部接口**，**不写死任何 key**；
+     · 只选照片 → **不入库**（缩略图纯展示）；
+     · 只有点了「确认导入」才走唯写入口 addEvent(rec, 'photo')；
+     · JSON 读不出来 → 报错 + **一条都不入库**。 */
+var PHOTO_TYPES = {};
+TYPES.forEach(function(t){ PHOTO_TYPES[t.k] = 1; });
+
+function setMsg(el, kind, text){
+  if(!el) return;
+  el.className = 'msgbox ' + kind;
+  el.textContent = text;
+}
+function mdShort(isoStr){
+  var p = String(isoStr || '').split('-');
+  return p.length === 3 ? (+p[1]) + '/' + (+p[2]) : String(isoStr || '—');
+}
+function hmCn(m){
+  var v = Math.max(0, Math.round(+m || 0));
+  var h = Math.floor(v / 60), mi = v % 60;
+  return (h ? h + '小时' : '') + (mi ? mi + '分' : (h ? '' : '0分'));
+}
+function photoDefaultDate(){
+  var el = document.getElementById('iImpDate');
+  return (el && el.value) || curDay() || today();
+}
+/* 每条记录的人话描述，给家长核对用 */
+function photoTail(r){
+  if(r.type === 'milk' || r.type === 'mealMilk'){
+    return (r.amount != null ? r.amount + 'ml' : (TYPE_NAME[r.type] || '奶'));
+  }
+  if(r.type === 'poo')   return (r.tags || []).join('、') || '便便';
+  if(r.type === 'meal')  return (r.foods || []).join('、') || '正餐';
+  if(r.type === 'nap' || r.type === 'night'){
+    return '睡到 ' + (r.end || '—')
+         + (r.minutes != null ? '，共' + hmCn(r.minutes) : '');
+  }
+  if(r.type === 'wake')  return '起床';
+  return TYPE_NAME[r.type] || '';
+}
+/* 解析粘贴内容：合法 → {recs:[...]}；任何不合法 → {err:'家长看得懂的话'}，且 recs 为空 */
+function photoParse(text){
+  var s = String(text == null ? '' : text).trim();
+  if(!s) return { err:'还没粘贴内容。把 AI 整理好的记录整段复制进来就行。' };
+  var o;
+  try{ o = JSON.parse(s); }
+  catch(e){
+    return { err:'这段内容读不出来，多半是没复制全。回到给你记录的地方，重新整段复制一次。' };
+  }
+  var arr = null;
+  if(Object.prototype.toString.call(o) === '[object Array]') arr = o;
+  else if(o && typeof o === 'object'){
+    if(Object.prototype.toString.call(o.events)  === '[object Array]') arr = o.events;
+    else if(Object.prototype.toString.call(o.records) === '[object Array]') arr = o.records;
+  }
+  if(!arr || !arr.length){
+    return { err:'没找到记录内容。应该是一组记录，或者带 events 的一段内容。' };
+  }
+  var defDate = photoDefaultDate(), recs = [], bad = [];
+  for(var i = 0; i < arr.length; i++){
+    var x = arr[i];
+    if(!x || typeof x !== 'object'){ bad.push(String(x)); continue; }
+    var r = normalizeEvent(x);
+    if(!r.type || !PHOTO_TYPES[r.type]){ bad.push(JSON.stringify(x).slice(0, 60)); continue; }
+    if(!r.date && !r.ownDate) r.date = defDate;
+    if(!r.ownDate) r.ownDate = r.date;
+    recs.push(r);
+  }
+  return { recs: recs, bad: bad, defDate: defDate };
+}
+function onPhotoPreview(){
+  var msg  = document.getElementById('photoMsg');
+  var box  = document.getElementById('photoPreview');
+  var ta   = document.getElementById('iPhotoJson');
+  var p    = photoParse(ta ? ta.value : '');
+  if(p.err){
+    box.classList.add('hidden'); box.innerHTML = '';
+    setMsg(msg, 'err', p.err);
+    return;
+  }
+  if(!p.recs.length){
+    box.classList.add('hidden'); box.innerHTML = '';
+    setMsg(msg, 'err', '这段内容里没有能认出来的记录。');
+    return;
+  }
+  /* 各字段之间留一个真实空格（不是只靠 CSS gap）—— 读屏与复制出来的文本才是「🍼 8/3 21:00 160ml」 */
+  box.innerHTML = p.recs.map(function(r){
+    return '<div class="pvrow"><span>' + (TYPE_ICO[r.type] || '📌') + '</span> '
+         + '<span class="pvd">' + esc(mdShort(r.ownDate || r.date)) + '</span> '
+         + '<span class="pvt">' + esc(normTime(r.time || r.start || '')) + '</span> '
+         + '<span>' + esc(photoTail(r)) + '</span></div>';
+  }).join('');
+  box.classList.remove('hidden');
+  setMsg(msg, 'info', '共 ' + p.recs.length + ' 条，'
+    + (p.bad.length ? '另有 ' + p.bad.length + ' 条认不出来，已跳过。' : '核对一下，没问题就点「确认导入」。'));
+}
+function onPhotoConfirm(){
+  var msg = document.getElementById('photoMsg');
+  var box = document.getElementById('photoPreview');
+  var ta  = document.getElementById('iPhotoJson');
+  var p   = photoParse(ta ? ta.value : '');
+  if(p.err){                                             // 非法 → 报错且不入库
+    if(box){ box.classList.add('hidden'); box.innerHTML = ''; }
+    setMsg(msg, 'err', p.err);
+    return;
+  }
+  if(!p.recs.length){
+    if(box){ box.classList.add('hidden'); box.innerHTML = ''; }
+    setMsg(msg, 'err', '这段内容里没有能认出来的记录。');
+    return;
+  }
+  var ok = 0;
+  p.recs.forEach(function(r){ if(addEvent(r, 'photo')) ok++; });   // 唯写入口
+  postImport();
+  boot();                                                          // 重画，不发 reload
+  var dup = p.recs.length - ok;
+  setMsg(msg, 'ok', '已记下 ' + ok + ' 条。'
+    + (dup ? '另外 ' + dup + ' 条之前记过了，已自动跳过，不会记两遍。' : ''));
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ② 一键迁移旧版
+   ─────────────────────────────────────────────────────────────────
+   旧版页面是**静态快照**：211 天历史硬编码在 HTML 里，零 JS。
+   迁移 = FileReader 读文本 → 按 dayblk 切块 → 逐块 parseHtmlFragment
+        → 一次 postImport()。与页面内其它入口共用同一个写入口。
+   切出来的块**按文件原顺序**处理（8/3、8/2、8/1、8/4），两种顺序终态一致。
+   切出 0 块（传错文件）→ 友好提示，不报错、不入库。 */
+function attrClass(openTag){
+  var m = /class\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/.exec(openTag || '');
+  if(!m) return '';
+  return (m[1] != null ? m[1] : (m[2] != null ? m[2] : (m[3] != null ? m[3] : '')));
+}
+function hasClassToken(openTag, token){
+  return attrClass(openTag).split(/\s+/).indexOf(token) !== -1;
+}
+function pad2(n){ return (n < 10 ? '0' : '') + n; }
+function iso(y, m, d){ return y + '-' + pad2(m) + '-' + pad2(d); }
+function daysInMonth(y, m){ return new Date(y, m, 0).getDate(); }
+function mdToISO(y, mo, d, baseMo, baseD){
+  var yy = y;
+  if(mo < baseMo || (mo === baseMo && d < baseD)) yy = y + 1;
+  return iso(yy, mo, d);
+}
+function plusOneDay(s){
+  var p = String(s).split('-'), y = +p[0], m = +p[1], d = +p[2];
+  d += 1;
+  if(d > daysInMonth(y, m)){ d = 1; m += 1; if(m > 12){ m = 1; y += 1; } }
+  return iso(y, m, d);
+}
+function splitDayBlocks(html, opts){
+  opts = opts || {};
+  html = String(html == null ? '' : html);
+  var starts = [], RE_DIV = /<div\b[^>]*>/g, mt;
+  while((mt = RE_DIV.exec(html)) !== null){
+    var tag = mt[0];
+    if(!hasClassToken(tag, 'dayblk')) continue;
+    var idx = null, cm = /(?:^|[\s-])blk(\d{1,3})(?=[\s"'>]|$)/.exec(attrClass(tag));
+    if(cm) idx = +cm[1];
+    starts.push({ pos: mt.index, tag: tag, blkIdx: idx });
+  }
+  var year = null, baseMo = 1, baseD = 1;
+  var mb = /生日\s*(\d{4})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日/.exec(html);
+  var mc = /<!--\s*(\d{4})-(\d{2})-(\d{2})[^>]*-->/g, mcLast = null, mcx;
+  while((mcx = mc.exec(html)) !== null) mcLast = mcx;
+  if(mb){ year = +mb[1]; baseMo = +mb[2]; baseD = +mb[3]; }
+  else if(mcLast){ year = +mcLast[1]; baseMo = +mcLast[2]; baseD = +mcLast[3]; }
+  else if(opts.year){ year = +opts.year; if(opts.baseMo) baseMo = +opts.baseMo; if(opts.baseD) baseD = +opts.baseD; }
+  var out = [];
+  for(var i = 0; i < starts.length; i++){
+    var st = starts[i];
+    var end = (i + 1 < starts.length) ? starts[i + 1].pos : html.length;
+    var frag = html.slice(st.pos, end);
+    var date = null, src = 'none';
+    var win = html.slice(Math.max(0, st.pos - (opts.lookback || 600)), st.pos);
+    var RE_MD = /<!--[^>]*?(\d{1,2})\s*月\s*(\d{1,2})\s*日[^>]*?-->/g, mm, lastM = null;
+    while((mm = RE_MD.exec(win)) !== null) lastM = mm;
+    if(lastM && year != null){
+      date = mdToISO(year, +lastM[1], +lastM[2], baseMo, baseD); src = 'comment';
+    }
+    if(!date && year != null){
+      var mc2 = /承接\s*(\d{1,2})\s*\/\s*(\d{1,2})\s+(\d{1,2}):(\d{2})/.exec(frag.slice(0, 3000));
+      if(mc2){ date = plusOneDay(mdToISO(year, +mc2[1], +mc2[2], baseMo, baseD)); src = 'carryPlus1'; }
+    }
+    out.push({ date: date, dateSrc: src, blkIdx: st.blkIdx, pos: st.pos, end: end,
+               bytes: end - st.pos, html: frag });
+  }
+  return out;
+}
+function runMigrate(file){
+  var msg = document.getElementById('migMsg');
+  if(!file){ setMsg(msg, 'info', '先选一个旧版页面文件，再点「开始迁移」。'); return; }
+  var fr = new FileReader();
+  fr.onerror = function(){ setMsg(msg, 'err', '这个文件读不出来，换一个文件试试。'); };
+  fr.onload = function(){
+    var html = String(fr.result || '');
+    var blocks = [];
+    try{ blocks = splitDayBlocks(html); }
+    catch(e){ blocks = []; }
+    var usable = blocks.filter(function(b){ return !!b.date; });
+    if(!usable.length){
+      /* 传错文件也**不报错、不入库**，只给一句家长看得懂的话 */
+      setMsg(msg, 'info', '这个文件里没找到可导入的记录，换旧版页面文件再试一次。');
+      return;
+    }
+    /* 条数按**库里实际增量**算：链首孤儿由 postImport() 统一裁决生成，
+       只数 parseHtmlFragment 的返回值会少算它（64 ≠ 65）。 */
+    var before = DB.events.length;
+    var cards = 0;
+    usable.forEach(function(b){
+      cards += (parseHtmlFragment(b.html, b.date).cards || 0);
+    });
+    postImport();
+    var ev = DB.events.length - before;
+    boot();
+    setMsg(msg, 'ok', ev
+      ? ('已导入 ' + cards + ' 天记录，共 ' + ev + ' 条明细。')
+      : '这个文件的记录之前已经导进来了，没有重复添加。');
+    console.log('[dudu] 迁移旧版：切出 ' + blocks.length + ' 块（可用 ' + usable.length
+      + '）· 汇总 ' + cards + ' 天 · 入库 ' + ev + ' 条');
+  };
+  fr.readAsText(file);
+}
+
 document.addEventListener('DOMContentLoaded', function(){
+  showStoreBar();
   buildChips();
   boot();
   document.getElementById('fab').onclick = openSheet;
@@ -3982,6 +4481,40 @@ document.addEventListener('DOMContentLoaded', function(){
   };
   var idt = document.getElementById('iImpDate');
   if(idt && !idt.value) idt.value = curDay() || today();
+
+  /* ---- 📷 照片 / JSON 导入 ---- */
+  var pFile = document.getElementById('iPhoto');
+  if(pFile) pFile.addEventListener('change', function(){
+    var box = document.getElementById('photoThumb');
+    var img = document.getElementById('photoImg');
+    var f = (pFile.files && pFile.files[0]) || null;
+    if(!f){ if(box) box.classList.add('hidden'); return; }
+    /* 选图**只做缩略图展示**，一步都不碰 DB —— 入库只在点「确认导入」时发生 */
+    var fr = new FileReader();
+    fr.onload = function(){
+      if(img) img.src = String(fr.result || '');
+      if(box) box.classList.remove('hidden');
+    };
+    fr.readAsDataURL(f);
+  });
+  var pPv = document.getElementById('btnPhotoPreview');
+  if(pPv) pPv.addEventListener('click', onPhotoPreview);
+  var pOk = document.getElementById('btnPhotoConfirm');
+  if(pOk) pOk.addEventListener('click', onPhotoConfirm);
+
+  /* ---- 📦 一键迁移旧版 ---- */
+  var mFile = document.getElementById('iMigrate');
+  var mBtn  = document.getElementById('btnMigrate');
+  var mClr  = document.getElementById('btnMigrateClear');
+  if(mBtn) mBtn.addEventListener('click', function(){
+    var f = (mFile && mFile.files && mFile.files[0]) || null;
+    runMigrate(f);
+  });
+  if(mClr) mClr.addEventListener('click', function(){
+    if(mFile) mFile.value = '';
+    var msg = document.getElementById('migMsg');
+    if(msg) msg.classList.add('hidden');
+  });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSheet(); });
   document.querySelectorAll('.tabs label').forEach(function(l){
     l.addEventListener('click', function(){ setTimeout(renderActive, 0); });
@@ -4008,8 +4541,12 @@ window.__dudu = { DB:function(){return DB;}, addEvent:addEvent, load:load, save:
                   nxEvents:nxEvents, verifyNxView:verifyNxView, NX_VIEW_EXPECT:NX_VIEW_EXPECT,
                   nightHeadMin:nightHeadMin, verifyCarry:verifyCarry, CARRY_EXPECT:CARRY_EXPECT,
                   normalizeEvent:normalizeEvent, buildChainHeads:buildChainHeads,
+                  DUDU_BUILD:DUDU_BUILD,
                   dayblkDates:dayblkDates, setDayblkDates:setDayblkDates, hasDayblk:hasDayblk,
                   DAYBLK_DATES:DAYBLK_DATES, verifyAbs:verifyAbs, INV_EXPECT:INV_EXPECT,
+                  /* 孤儿统一裁决入口（诊断用）：解析期只登记，这里才是唯一生成/撤销点 */
+                  syncOrphans:syncOrphans,
+                  pendCarry:function(){ return PENDING_CARRY.slice(); },
                   renderP1:renderP1, renderP2:renderP2, renderP4x:renderP4x,
                   resetRender:function(){ RENDERED = {}; } };
 })();
